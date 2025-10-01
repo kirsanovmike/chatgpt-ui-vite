@@ -1,0 +1,205 @@
+<script setup>
+const dialog = ref(false)
+const currentModel = useCurrentModel()
+
+const availableModels = [
+  'gpt-3.5-turbo',
+  'gpt-3.5-turbo-16k',
+  'gpt-4',
+  'gpt-4-32k',
+  'gpt-4-1106-preview',
+  'gpt-4o'
+]
+
+// безопасная инициализация на случай пустого currentModel
+const currentModelDefault = ref(MODELS?.[currentModel.value?.name] ?? { total_tokens: 0 })
+
+onNuxtReady(() => {
+  currentModel.value = getCurrentModel()
+  currentModelDefault.value = MODELS?.[currentModel.value?.name] ?? { total_tokens: 0 }
+
+  watch(
+    currentModel,
+    (newVal) => {
+      currentModelDefault.value = MODELS?.[newVal?.name] ?? { total_tokens: 0 }
+      saveCurrentModel(newVal)
+    },
+    { deep: true }
+  )
+})
+</script>
+
+<template>
+  <v-dialog
+    v-model="dialog"
+    persistent
+  >
+    <template v-slot:activator="{ props }">
+      <v-list-item
+        v-bind="props"
+        rounded="xl"
+        prepend-icon="tune"
+        title="Model parameters"
+      ></v-list-item>
+    </template>
+
+    <v-card>
+      <v-toolbar density="compact">
+        <v-toolbar-title>Model parameters</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon="close" @click="dialog = false"></v-btn>
+      </v-toolbar>
+
+      <v-card-text>
+        <v-select
+          v-model="currentModel.name"
+          label="Model"
+          :items="availableModels"
+          variant="underlined"
+        ></v-select>
+
+        <v-row no-gutters>
+          <v-col cols="12">
+            <div class="d-flex justify-space-between align-center">
+              <v-list-subheader>Temperature</v-list-subheader>
+              <v-text-field
+                v-model.number="currentModel.temperature"
+                hide-details
+                single-line
+                density="compact"
+                type="number"
+                max="1"
+                step="0.01"
+                style="width: 100px"
+                class="flex-grow-0"
+              ></v-text-field>
+            </div>
+          </v-col>
+          <v-col cols="12">
+            <v-slider
+              v-model="currentModel.temperature"
+              :max="1"
+              :step="0.01"
+              hide-details
+            ></v-slider>
+          </v-col>
+        </v-row>
+
+        <v-row no-gutters>
+          <v-col cols="12">
+            <div class="d-flex justify-space-between align-center">
+              <v-list-subheader>Max tokens</v-list-subheader>
+              <v-text-field
+                v-model.number="currentModel.max_tokens"
+                hide-details
+                single-line
+                density="compact"
+                type="number"
+                :max="currentModelDefault.total_tokens"
+                step="1"
+                style="width: 100px"
+                class="flex-grow-0"
+              ></v-text-field>
+            </div>
+            <div class="text-caption">
+              The absolute maximum for this model is
+              <b>{{ currentModelDefault.total_tokens }}</b> tokens.
+            </div>
+          </v-col>
+          <v-col cols="12">
+            <v-slider
+              v-model="currentModel.max_tokens"
+              :max="currentModelDefault.total_tokens"
+              :step="1"
+              hide-details
+            ></v-slider>
+          </v-col>
+        </v-row>
+
+        <v-row no-gutters>
+          <v-col cols="12">
+            <div class="d-flex justify-space-between align-center">
+              <v-list-subheader>Top-p</v-list-subheader>
+              <v-text-field
+                v-model.number="currentModel.top_p"
+                hide-details
+                single-line
+                density="compact"
+                type="number"
+                max="1"
+                step="0.01"
+                style="width: 100px"
+                class="flex-grow-0"
+              ></v-text-field>
+            </div>
+          </v-col>
+          <v-col cols="12">
+            <v-slider
+              v-model="currentModel.top_p"
+              :max="1"
+              :step="0.01"
+              hide-details
+            ></v-slider>
+          </v-col>
+        </v-row>
+
+        <v-row no-gutters>
+          <v-col cols="12">
+            <div class="d-flex justify-space-between align-center">
+              <v-list-subheader>Frequency penalty</v-list-subheader>
+              <v-text-field
+                v-model.number="currentModel.frequency_penalty"
+                hide-details
+                single-line
+                density="compact"
+                type="number"
+                max="2"
+                step="0.01"
+                style="width: 100px"
+                class="flex-grow-0"
+              ></v-text-field>
+            </div>
+          </v-col>
+          <v-col cols="12">
+            <v-slider
+              v-model="currentModel.frequency_penalty"
+              :max="2"
+              :step="0.01"
+              hide-details
+            ></v-slider>
+          </v-col>
+        </v-row>
+
+        <v-row no-gutters>
+          <v-col cols="12">
+            <div class="d-flex justify-space-between align-center">
+              <v-list-subheader>Presence penalty</v-list-subheader>
+              <v-text-field
+                v-model.number="currentModel.presence_penalty"
+                hide-details
+                single-line
+                density="compact"
+                type="number"
+                max="2"
+                step="0.01"
+                style="width: 100px"
+                class="flex-grow-0"
+              ></v-text-field>
+            </div>
+          </v-col>
+          <v-col cols="12">
+            <v-slider
+              v-model="currentModel.presence_penalty"
+              :max="2"
+              :step="0.01"
+              hide-details
+            ></v-slider>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>
+
+<style scoped>
+</style>
