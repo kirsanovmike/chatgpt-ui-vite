@@ -99,7 +99,16 @@
 </template>
 
 <script setup>
+import {ref} from "vue";
+import {useCurrentModel} from "@/composables/states.js";
+import {setModels} from "@/utils/localStorage.js";
+
 const dialog = ref(false)
+
+function useModels() {
+  return undefined;
+}
+
 const models = useModels()
 const currentModel = useCurrentModel()
 
@@ -134,7 +143,7 @@ const save = async () => {
     return
   }
   setModels(models.value)
-  setCurrentModel(currentModel.value)
+  // setCurrentModel(currentModel.value)
   dialog.value = false
 }
 </script>

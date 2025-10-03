@@ -22,6 +22,7 @@ import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
 import copy from 'copy-to-clipboard'
 import mathjax3 from 'markdown-it-mathjax3'
+import {nextTick, onMounted, ref, watchEffect} from "vue";
 
 const md = new MarkdownIt({
   linkify: true,
@@ -43,7 +44,7 @@ const contentHtml = ref('')
 const contentElm = ref(null)
 
 watchEffect(async () => {
-  contentHtml.value = props.message.message ? md.render(props.message.message) : ''
+  contentHtml.value = props.message?.message ? md.render(props.message.message) : ''
   await nextTick()
   bindCopyCodeToButtons()
 })

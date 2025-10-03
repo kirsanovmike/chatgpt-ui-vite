@@ -71,6 +71,8 @@
 </template>
 
 <script setup>
+import {onMounted, ref, toRefs} from "vue";
+
 const props = defineProps({
   sendMessage: { type: Function, required: false },
   control: { type: Object, required: true }
@@ -203,5 +205,5 @@ async function deleteSelectedDocs() {
 
 defineExpose({ loadDocs })
 
-onNuxtReady(loadDocs)
+onMounted(loadDocs)
 </script>

@@ -8,7 +8,7 @@
               <div v-if="route.query.email_verification_required && route.query.email_verification_required === 'none'">
                 <h2 class="text-h4">Your registration is successful</h2>
                 <p class="mt-5">
-                  You can now <NuxtLink to="/account/signin">sign in</NuxtLink> to your account.
+                  You can now <router-link to="/account/signin">sign in</router-link> to your account.
                 </p>
               </div>
 
@@ -41,6 +41,8 @@
 </template>
 
 <script setup>
+import {onMounted} from "vue";
+
 definePageMeta({
   layout: 'vuetify-app',
   middleware: ['auth']
@@ -66,7 +68,7 @@ const resendEmail = async () => {
   sending.value = false
 }
 
-onNuxtReady(() => {
+onMounted(() => {
   if (route.query.resend) {
     resendEmail()
   }

@@ -62,6 +62,8 @@
 
 <script setup>
 import { isMobile } from 'is-mobile'
+import {computed, ref, watchEffect} from "vue";
+import DocumentsManage from "@/components/DocumentsManage.vue";
 
 const props = defineProps({
   sendMessage: { type: Function, required: true },

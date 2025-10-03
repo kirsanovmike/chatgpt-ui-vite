@@ -1,4 +1,10 @@
 <script setup>
+import {onMounted, ref} from "vue";
+import {MODELS} from "@/utils/enums.js";
+import {getCurrentModel, saveCurrentModel} from "@/utils/localStorage.js";
+import {watch} from "fs";
+import {useCurrentModel} from "@/composables/states.js";
+
 const dialog = ref(false)
 const currentModel = useCurrentModel()
 
@@ -14,7 +20,7 @@ const availableModels = [
 // безопасная инициализация на случай пустого currentModel
 const currentModelDefault = ref(MODELS?.[currentModel.value?.name] ?? { total_tokens: 0 })
 
-onNuxtReady(() => {
+onMounted(() => {
   currentModel.value = getCurrentModel()
   currentModelDefault.value = MODELS?.[currentModel.value?.name] ?? { total_tokens: 0 }
 

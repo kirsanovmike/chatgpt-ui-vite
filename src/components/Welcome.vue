@@ -1,13 +1,14 @@
+<!-- src/components/Welcome.vue -->
 <template>
   <v-container>
     <v-row>
       <v-col cols="12">
         <div class="text-center">
           <h2 class="text-h2">
-            Welcome to <span class="text-primary">{{ runtimeConfig.public.appName }}</span>
-          </h2>
+            {{ $textVariables.welcomeTo }} <span class="text-primary">{{ APP_NAME }}</span>
+          </h2>Ò
           <p class="text-caption my-5">
-            {{ runtimeConfig.public.appName }} helps you ask questions, draft content, and explore ideas faster.
+            {{ APP_NAME }} помогает Вам обзаться с большими языковыми моделями.
             <br />
           </p>
         </div>
@@ -22,12 +23,13 @@
             <v-row>
               <v-col>
                 <div class="d-flex flex-column align-center">
-                  <v-icon icon="sunny"></v-icon>
-                  <h3 class="text-h6">Examples</h3>
+                  <v-icon icon="sunny" />
+                  <h3 class="text-h6"> {{ $textVariables.welcomeScreen.examples.title }}
+                  </h3>
                 </div>
               </v-col>
             </v-row>
-            <WelcomeCard v-for="(example, i) in examples" :key="'ex-'+i" :content="example" />
+            <WelcomeCard v-for="(example, i) in $textVariables.welcomeScreen.examples.items" :key="'ex-' + i" :content="example" />
           </v-col>
 
           <!-- Capabilities -->
@@ -35,12 +37,12 @@
             <v-row>
               <v-col>
                 <div class="d-flex flex-column align-center">
-                  <v-icon icon="bolt"></v-icon>
-                  <h3 class="text-h6">Capabilities</h3>
+                  <v-icon icon="bolt" />
+                  <h3 class="text-h6">{{$textVariables.welcomeScreen.capabilities.title}}</h3>
                 </div>
               </v-col>
             </v-row>
-            <WelcomeCard v-for="(capability, i) in capabilities" :key="'cap-'+i" :content="capability" />
+            <WelcomeCard v-for="(cap, i) in $textVariables.welcomeScreen.capabilities.items" :key="'cap-' + i" :content="cap" />
           </v-col>
 
           <!-- Limitations -->
@@ -48,12 +50,12 @@
             <v-row>
               <v-col>
                 <div class="d-flex flex-column align-center">
-                  <v-icon icon="warning_amber"></v-icon>
-                  <h3 class="text-h6">Limitations</h3>
+                  <v-icon icon="warning_amber" />
+                  <h3 class="text-h6">{{$textVariables.welcomeScreen.limitations.title}}</h3>
                 </div>
               </v-col>
             </v-row>
-            <WelcomeCard v-for="(limitation, i) in limitations" :key="'lim-'+i" :content="limitation" />
+            <WelcomeCard v-for="(lim, i) in $textVariables.welcomeScreen.limitations.items" :key="'lim-' + i" :content="lim" />
           </v-col>
         </v-row>
       </v-col>
@@ -61,25 +63,8 @@
   </v-container>
 </template>
 
-<script setup>
-const runtimeConfig = useRuntimeConfig()
+<script setup lang="ts">
+import WelcomeCard from '@/components/WelcomeCard.vue'
 
-// Статические строки вместо $i18n.t(...)
-const examples = ref([
-  '“Summarize this article in 5 bullet points.”',
-  '“Draft a polite email to reschedule a meeting.”',
-  '“Explain WebSockets to a junior developer with an example.”'
-])
-
-const capabilities = ref([
-  'Understands follow-ups and keeps context in the current chat.',
-  'Can format answers with lists, code blocks, and tables.',
-  'Works with math/LaTeX and basic reasoning tasks.'
-])
-
-const limitations = ref([
-  'May produce inaccuracies — verify important facts.',
-  'No real-time browsing unless explicitly enabled in tools.',
-  'Does not retain memories across chats unless you add it.'
-])
+const APP_NAME = import.meta.env.VITE_APP_NAME ?? 'ТНЭ чат'
 </script>

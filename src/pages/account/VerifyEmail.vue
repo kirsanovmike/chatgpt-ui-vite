@@ -44,6 +44,8 @@
 </template>
 
 <script setup>
+import {onMounted} from "vue";
+
 definePageMeta({
   layout: 'vuetify-app',
   path: '/account/verify-email/:token',
@@ -93,7 +95,7 @@ const resend = async () => {
   await navigateTo('/account/onboarding?resend=1')
 }
 
-onNuxtReady(() => {
+onMounted(() => {
   verifyEmail()
 })
 </script>

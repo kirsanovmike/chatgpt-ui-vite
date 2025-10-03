@@ -1,186 +1,251 @@
-<script setup>
-import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
+<script setup lang="ts">
+// ==============================
+// Conversation.vue (Vite + TS)
+// ==============================
 
-const { $settings } = useNuxtApp()
-const runtimeConfig = useRuntimeConfig()
-const currentModel = useCurrentModel()
-const openaiApiKey = useApiKey()
+import MessageActions from '@/components/MessageActions.vue'
+import MsgContent from '@/components/MsgContent.vue'
+import MsgEditor from '@/components/MsgEditor.vue'
+import Prompt from '@/components/Prompt.vue'
 
+// остальной ваш код Conversation.vue
+
+import { inject, onMounted, ref } from 'vue'
+
+// Если эти компоненты не зарегистрированы глобально — раскомментируй импорты:
+// import MessageActions from '@/components/MessageActions.vue'
+// import MsgContent from '@/components/MsgContent.vue'
+// import MsgEditor from '@/components/MsgEditor.vue'
+// import Prompt from '@/components/Prompt.vue'
+
+// ---------- Типы ----------
+type ChatMessage = {
+  id?: number | string | null
+  is_bot?: boolean
+  is_disabled?: boolean
+  message: string
+  message_type?: number
+}
+type ConversationT = {
+  id: number | string | null
+  topic: string | null
+  messages: ChatMessage[]
+  loadingMessages: boolean
+}
+
+// ---------- Инъекции / пропсы ----------
+const settings = inject<Record<string, string> | undefined>('settings', {})
+const props = defineProps<{ conversation: ConversationT }>()
+
+// ---------- Флаги / состояние ----------
+const USE_BACKEND = false // 👈 оффлайн-режим (всё, что ходит в сеть, вырублено)
 const fetchingResponse = ref(false)
-const messageQueue = []
+const messageQueue: string[] = []
 const frugalMode = ref(true)
 let isProcessingQueue = false
 
-const props = defineProps({
-  conversation: { type: Object, required: true }
-})
+const editor = ref<{ usePrompt?: (s: string) => void; refreshDocList?: () => void } | null>(null)
+const enableWebSearch = ref(false)
+const snackbar = ref(false)
+const snackbarText = ref('')
 
-const processMessageQueue = () => {
-  if (isProcessingQueue || messageQueue.length === 0) return
-
-  if (!props.conversation.messages[props.conversation.messages.length - 1].is_bot) {
-    props.conversation.messages.push({ id: null, is_bot: true, message: '' })
-  }
-
-  isProcessingQueue = true
-  const nextMessage = messageQueue.shift()
-
-  if (runtimeConfig.public.typewriter) {
-    let i = 0
-    const intervalId = setInterval(() => {
-      props.conversation.messages[props.conversation.messages.length - 1].message += nextMessage[i]
-      i++
-      if (i === nextMessage.length) {
-        clearInterval(intervalId)
-        isProcessingQueue = false
-        processMessageQueue()
-      }
-    }, runtimeConfig.public.typewriterDelay)
-  } else {
-    props.conversation.messages[props.conversation.messages.length - 1].message += nextMessage
-    isProcessingQueue = false
-    processMessageQueue()
+// ---------- Заглушки вместо Nuxt-композаблов ----------
+const getCurrentModel = () => {
+  // Минимальная заглушка модели (если нужно — подставь реальные значения)
+  return {
+    name: 'gpt-3.5-turbo',
+    frequency_penalty: 0,
+    presence_penalty: 0,
+    total_tokens: 4096,
+    max_tokens: 1000,
+    temperature: 0.7,
+    top_p: 1.0,
   }
 }
-
-let ctrl
-const abortFetch = () => {
-  if (ctrl) ctrl.abort()
-  fetchingResponse.value = false
+const currentModel = ref(getCurrentModel())
+const openaiApiKey = ref<string | null>(null)
+const genTitle = async (_conversationId: string | number) => {
+  // без бэкенда — no-op
 }
 
-const fetchReply = async (message) => {
-  ctrl = new AbortController()
-
-  let msg = message
-  if (Array.isArray(message)) {
-    msg = message[message.length - 1]
-  } else {
-    message = [message]
-  }
-
-  const webSearchParams = {}
-  if (enableWebSearch.value || msg.tool === 'web_search') {
-    webSearchParams['web_search'] = {
-      ua: navigator.userAgent,
-      // было $i18n.t('webSearchDefaultPrompt')
-      default_prompt: 'Кратко ответь. При необходимости используй веб-поиск и укажи источники.'
-    }
-  }
-
-  if (msg.tool === 'web_search') {
-    msg.tool_args = webSearchParams['web_search']
-    msg.type = 100
-  } else if (msg.tool === 'arxiv') {
-    msg.tool_args = null
-    msg.type = 110
-  }
-
-  const data = Object.assign({}, currentModel.value, {
-    openaiApiKey: $settings.open_api_key_setting === 'True' ? openaiApiKey.value : null,
-    message,
-    conversationId: props.conversation.id,
-    frugalMode: frugalMode.value
-  }, webSearchParams)
-
-  try {
-    await fetchEventSource('/api/conversation/', {
-      signal: ctrl.signal,
-      method: 'POST',
-      headers: { accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-      openWhenHidden: true,
-      onopen(response) {
-        if (response.ok && response.headers.get('content-type') === EventStreamContentType) return
-        throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`)
-      },
-      onclose() {
-        if (ctrl.signal.aborted === true) return
-        throw new Error('Failed to send message. Server closed the connection unexpectedly.')
-      },
-      onerror(err) {
-        throw err
-      },
-      async onmessage(message) {
-        const event = message.event
-        const data = JSON.parse(message.data)
-
-        if (event === 'error') {
-          abortFetch()
-          showSnackbar(data.error)
-          return
-        }
-        if (event === 'userMessageId') {
-          props.conversation.messages[props.conversation.messages.length - 1].id = data.userMessageId
-          return
-        }
-        if (event === 'done') {
-          abortFetch()
-          props.conversation.messages[props.conversation.messages.length - 1].id = data.messageId
-          if (!props.conversation.id) {
-            props.conversation.id = data.conversationId
-            genTitle(props.conversation.id)
-          }
-          if (data.newDocId) {
-            editor.value?.refreshDocList?.()
-          }
-          return
-        }
-
-        messageQueue.push(data.content)
-        processMessageQueue()
-        scrollChatWindow()
-      }
-    })
-  } catch (err) {
-    console.log(err)
-    abortFetch()
-    showSnackbar(err.message)
-  }
+// ---------- UI utils ----------
+const showSnackbar = (text: string) => {
+  snackbarText.value = text
+  snackbar.value = true
 }
 
-const grab = ref(null)
+const grab = ref<HTMLElement | null>(null)
 const scrollChatWindow = () => {
   if (!grab.value) return
   grab.value.scrollIntoView({ behavior: 'smooth' })
 }
 
-const send = (message) => {
+// ---------- Очередь «печати» ответа ----------
+const processMessageQueue = () => {
+  if (isProcessingQueue || messageQueue.length === 0) return
+
+  if (!props.conversation.messages[props.conversation.messages.length - 1]?.is_bot) {
+    props.conversation.messages.push({ id: null, is_bot: true, message: '' })
+  }
+
+  isProcessingQueue = true
+  const nextChunk = messageQueue.shift()!
+
+  // Если хочешь красивую «печатную» анимацию — раскомментируй и выставь задержку:
+  const TYPEWRITER = false
+  const TYPEWRITER_DELAY = 50
+
+  if (TYPEWRITER) {
+    let i = 0
+    const intervalId = setInterval(() => {
+      props.conversation.messages[props.conversation.messages.length - 1].message += nextChunk[i]
+      i++
+      if (i === nextChunk.length) {
+        clearInterval(intervalId)
+        isProcessingQueue = false
+        processMessageQueue()
+      }
+    }, TYPEWRITER_DELAY)
+  } else {
+    props.conversation.messages[props.conversation.messages.length - 1].message += nextChunk
+    isProcessingQueue = false
+    processMessageQueue()
+  }
+}
+
+// ---------- Сетевой аборт (в оффлайне просто сбрасываем флаг) ----------
+let ctrl: AbortController | null = null
+const abortFetch = () => {
+  if (ctrl) ctrl.abort()
+  fetchingResponse.value = false
+}
+
+// ---------- «Отправка» сообщения ----------
+const fetchReply = async (message: { content: string; tool?: string; message_type?: number } | Array<{ content: string; tool?: string; message_type?: number }>) => {
+  // Оффлайн-режим: безопасная заглушка без сетевых вызовов
+  if (!USE_BACKEND) {
+    // имитация короткого ответа ассистента + очередь чанков
+    setTimeout(() => {
+      messageQueue.push(`Echo: ${Array.isArray(message) ? message.at(-1)?.content ?? '' : message.content}`)
+      processMessageQueue()
+      fetchingResponse.value = false
+    }, 250)
+    return
+  }
+
+  // ===== Ниже оставить закомментированным (включишь, когда подключишь API/стрим) =====
+
+  // ctrl = new AbortController()
+
+  // // Подготовка payload
+  // let msg = Array.isArray(message) ? message[message.length - 1] : message
+  // const webSearchParams: Record<string, any> = {}
+
+  // if (enableWebSearch.value || msg.tool === 'web_search') {
+  //   webSearchParams['web_search'] = {
+  //     ua: navigator.userAgent,
+  //     default_prompt: 'Кратко ответь. При необходимости используй веб-поиск и укажи источники.',
+  //   }
+  // }
+
+  // if (msg.tool === 'web_search') {
+  //   // @ts-expect-error динамический атрибут
+  //   msg.tool_args = webSearchParams['web_search']
+  //   // @ts-expect-error совместимость с исходным форматом
+  //   msg.type = 100
+  // } else if (msg.tool === 'arxiv') {
+  //   // @ts-expect-error динамический атрибут
+  //   msg.tool_args = null
+  //   // @ts-expect-error
+  //   msg.type = 110
+  // }
+
+  // const payload = Object.assign({}, currentModel.value, {
+  //   openaiApiKey: settings?.open_api_key_setting === 'True' ? openaiApiKey.value : null,
+  //   message: Array.isArray(message) ? message : [message],
+  //   conversationId: props.conversation.id,
+  //   frugalMode: frugalMode.value,
+  // }, webSearchParams)
+
+  // try {
+  //   const { EventStreamContentType, fetchEventSource } = await import('@microsoft/fetch-event-source')
+  //   await fetchEventSource('/api/conversation/', {
+  //     signal: ctrl.signal,
+  //     method: 'POST',
+  //     headers: { accept: 'application/json', 'Content-Type': 'application/json' },
+  //     body: JSON.stringify(payload),
+  //     openWhenHidden: true,
+  //     onopen(response) {
+  //       if (response.ok && response.headers.get('content-type') === EventStreamContentType) return
+  //       throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`)
+  //     },
+  //     onclose() {
+  //       if (ctrl?.signal.aborted) return
+  //       throw new Error('Failed to send message. Server closed the connection unexpectedly.')
+  //     },
+  //     onerror(err) { throw err },
+  //     onmessage(ev) {
+  //       const event = ev.event
+  //       const data = JSON.parse(ev.data)
+
+  //       if (event === 'error') {
+  //         abortFetch()
+  //         showSnackbar(data.error)
+  //         return
+  //       }
+  //       if (event === 'userMessageId') {
+  //         props.conversation.messages[props.conversation.messages.length - 1].id = data.userMessageId
+  //         return
+  //       }
+  //       if (event === 'done') {
+  //         abortFetch()
+  //         props.conversation.messages[props.conversation.messages.length - 1].id = data.messageId
+  //         if (!props.conversation.id) {
+  //           props.conversation.id = data.conversationId
+  //           genTitle(props.conversation.id)
+  //         }
+  //         if (data.newDocId) {
+  //           editor.value?.refreshDocList?.()
+  //         }
+  //         return
+  //       }
+
+  //       messageQueue.push(data.content)
+  //       processMessageQueue()
+  //       scrollChatWindow()
+  //     }
+  //   })
+  // } catch (err: any) {
+  //     console.error(err)
+  //     abortFetch()
+  //     showSnackbar(err?.message ?? 'Failed to send message')
+  // }
+}
+
+const send = (message: { content: string; tool?: string; message_type?: number } | Array<{ content: string; tool?: string; message_type?: number }>) => {
   fetchingResponse.value = true
-  if (props.conversation.messages.length === 0) addConversation(props.conversation)
+  // Если это самый первый месседж — можно было бы addConversation(props.conversation), но без глобального стора опускаем
 
   if (Array.isArray(message)) {
     props.conversation.messages.push(...message.map(i => ({ message: i.content, message_type: i.message_type })))
   } else {
     props.conversation.messages.push({ message: message.content, message_type: message.message_type })
   }
+
   fetchReply(message)
   scrollChatWindow()
 }
 
 const stop = () => abortFetch()
 
-const snackbar = ref(false)
-const snackbarText = ref('')
-const showSnackbar = (text) => {
-  snackbarText.value = text
-  snackbar.value = true
-}
-
-const editor = ref(null)
-const usePrompt = (prompt) => editor.value.usePrompt(prompt)
-
-const deleteMessage = (index) => {
-  props.conversation.messages.splice(index, 1)
-}
-
-const toggleMessage = (index) => {
+const usePrompt = (prompt: string) => editor.value?.usePrompt?.(prompt)
+const deleteMessage = (index: number) => { props.conversation.messages.splice(index, 1) }
+const toggleMessage = (index: number) => {
   props.conversation.messages[index].is_disabled = !props.conversation.messages[index].is_disabled
 }
 
-const enableWebSearch = ref(false)
-
-onNuxtReady(() => {
+// ---------- Mounted ----------
+onMounted(() => {
   currentModel.value = getCurrentModel()
 })
 </script>
@@ -252,16 +317,19 @@ onNuxtReady(() => {
 
       <v-toolbar density="comfortable" color="transparent">
         <Prompt v-show="!fetchingResponse" :use-prompt="usePrompt" />
+
         <v-switch
-          v-if="$settings.open_web_search === 'True'"
+          v-if="settings?.open_web_search === 'True'"
           v-model="enableWebSearch"
           inline
           hide-details
           color="primary"
           label="Web search"
         />
+
         <v-spacer />
-        <div v-if="$settings.open_frugal_mode_control === 'True'" class="d-flex align-center">
+
+        <div v-if="settings?.open_frugal_mode_control === 'True'" class="d-flex align-center">
           <v-switch
             v-model="frugalMode"
             inline

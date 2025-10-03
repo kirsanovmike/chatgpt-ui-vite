@@ -143,6 +143,9 @@
 </template>
 
 <script setup>
+import {onMounted, ref} from "vue";
+import {useAuthFetch} from "@/compat/fetch.js";
+
 const menu = ref(false)
 const prompts = ref([])
 const editingPrompt = ref(null)
@@ -227,7 +230,7 @@ const selectPrompt = (prompt) => {
   menu.value = false
 }
 
-onNuxtReady(() => {
+onMounted(() => {
   loadPrompts()
 })
 </script>

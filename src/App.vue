@@ -1,9 +1,15 @@
-<script setup lang="ts">
-import ChatPage from '@/pages/index.vue'
-</script>
-
+<!-- src/App.vue -->
 <template>
-  <ChatPage />
+  <!-- передаем текущую тему -->
+  <v-app :theme="themeName">
+    <NavigationDrawer/>
+    <router-view/>
+  </v-app>
 </template>
 
-<style scoped></style>
+<script lang="ts" setup>
+import { useThemeMode } from '@/composables/theme'
+import NavigationDrawer from '@/components/NavigationDrawer.vue'
+
+const { themeName } = useThemeMode()
+</script>

@@ -61,6 +61,8 @@
 
 <script setup>
 import copy from 'copy-to-clipboard'
+import {ref} from "vue";
+import {useAuthFetch} from "@/compat/fetch.js";
 
 const props = defineProps({
   message: { type: Object, required: true },
@@ -89,7 +91,7 @@ const editMessage = () => {
 
 // Переименовано, чтобы не конфликтовать с prop.deleteMessage
 const onDeleteMessage = async () => {
-  const { error } = await useAuthFetch(`/api/chat/messages/${props.message.id}/`, {
+  const { error } = await useAuthFetch(`/api/chat/messages/${props.message?.id}/`, {
     method: 'DELETE'
   })
   if (!error.value) {
@@ -101,8 +103,8 @@ const onDeleteMessage = async () => {
 }
 
 const onToggleMessage = async () => {
-  const msg = { ...props.message, is_disabled: !props.message.is_disabled }
-  const { error } = await useAuthFetch(`/api/chat/messages/${props.message.id}/`, {
+  const msg = { ...props.message, is_disabled: !props.message?.is_disabled }
+  const { error } = await useAuthFetch(`/api/chat/messages/${props.message?.id}/`, {
     method: 'PUT',
     body: JSON.stringify(msg)
   })

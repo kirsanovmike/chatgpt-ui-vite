@@ -1,3 +1,4 @@
+// src/composables/states.ts
 import { ref, type Ref } from 'vue'
 
 export type Conversation = {
@@ -8,7 +9,7 @@ export type Conversation = {
 }
 
 const _apiKey: Ref<string | null> = ref(null)
-const _currentModel: Ref<any | null> = ref(null) // если нужно объектом; можно типизировать
+const _currentModel: Ref<any | null> = ref(null)
 const _conversations: Ref<Conversation[]> = ref([])
 const _user: Ref<any | null> = ref(null)
 const _drawer: Ref<boolean> = ref(false)

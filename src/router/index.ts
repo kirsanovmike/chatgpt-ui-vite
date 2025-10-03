@@ -4,7 +4,7 @@ const SignIn      = () => import('@/pages/account/Signin.vue')
 const SignUp      = () => import('@/pages/account/Signup.vue')
 const Onboarding  = () => import('@/pages/account/Onboarding.vue')
 const VerifyEmail = () => import('@/pages/account/VerifyEmail.vue')
-const Chat        = () => import('@/pages/index.vue')
+const Chat        = () => import('@/pages/Chat.vue')
 // если нужна страница смены пароля — добавь:
 // const ResetPassword = () => import('@/pages/account/ResetPassword.vue')
 
