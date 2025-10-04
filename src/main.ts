@@ -5,11 +5,13 @@ import router from './router'
 import { createPinia } from 'pinia'
 
 import 'vuetify/styles'
+import './styles/fonts.css'       // @font-face на PTSans
+import './styles/typography.css'  // var(--v-font-family) = 'PT Sans'
+
 import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
-
 import textVariables from '@/lang/textVariables'
 
 const vuetify = createVuetify({
@@ -24,10 +26,16 @@ const vuetify = createVuetify({
     themes: {
       light: { dark: false, colors: {} },
       dark: { dark: true, colors: {} },
-      // системная тема — алиас, переключаем вручную
       system: {
         dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
         colors: {},
+      },
+    },
+  },
+  defaults: {
+    global: {
+      style: {
+        fontFamily: 'PT Sans, sans-serif',
       },
     },
   },
