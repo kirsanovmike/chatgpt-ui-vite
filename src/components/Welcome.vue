@@ -17,9 +17,8 @@
     <!-- Основные блоки -->
     <v-row class="mt-10" align="start">
       <!-- Примеры -->
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <div class="d-flex flex-column align-center mb-4">
-          <v-icon icon="sunny" class="mb-2" />
           <h3 class="text-subtitle-1 text-medium-emphasis">
             {{ $textVariables.welcomeScreen.examples.title }}
           </h3>
@@ -31,25 +30,23 @@
         />
       </v-col>
 
-      <!-- Возможности -->
-      <v-col cols="12" md="3">
-        <div class="d-flex flex-column align-center mb-4">
-          <v-icon icon="bolt" class="mb-2" />
-          <h3 class="text-subtitle-1 text-medium-emphasis">
-            {{ $textVariables.welcomeScreen.capabilities.title }}
-          </h3>
-        </div>
-        <WelcomeCard
-            v-for="(cap, i) in $textVariables.welcomeScreen.capabilities.items"
-            :key="'cap-' + i"
-            :content="cap"
-        />
-      </v-col>
+<!--      &lt;!&ndash; Возможности &ndash;&gt;-->
+<!--      <v-col cols="12" md="4">-->
+<!--        <div class="d-flex flex-column align-center mb-4">-->
+<!--          <h3 class="text-subtitle-1 text-medium-emphasis">-->
+<!--            {{ $textVariables.welcomeScreen.capabilities.title }}-->
+<!--          </h3>-->
+<!--        </div>-->
+<!--        <WelcomeCard-->
+<!--            v-for="(cap, i) in $textVariables.welcomeScreen.capabilities.items"-->
+<!--            :key="'cap-' + i"-->
+<!--            :content="cap"-->
+<!--        />-->
+<!--      </v-col>-->
 
       <!-- Ограничения -->
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <div class="d-flex flex-column align-center mb-4">
-          <v-icon icon="warning_amber" class="mb-2" />
           <h3 class="text-subtitle-1 text-medium-emphasis">
             {{ $textVariables.welcomeScreen.limitations.title }}
           </h3>
@@ -62,9 +59,8 @@
       </v-col>
 
       <!-- Готовые промты -->
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <div class="d-flex flex-column align-center mb-4">
-          <v-icon icon="article" class="mb-2" />
           <h3 class="text-subtitle-1 text-medium-emphasis">Готовые промты</h3>
         </div>
 

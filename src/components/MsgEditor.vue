@@ -1,31 +1,31 @@
 <template>
   <div class="flex-grow-1 d-flex align-center justify-space-between">
-    <v-btn
-      title="Tools"
-      :icon="getToolIcon()"
-      density="compact"
-      size="default"
-      class="mr-3"
-      id="tools_btn"
-    >
-    </v-btn>
+<!--    <v-btn-->
+<!--      title="Tools"-->
+<!--      :icon="getToolIcon()"-->
+<!--      density="compact"-->
+<!--      size="default"-->
+<!--      class="mr-3"-->
+<!--      id="tools_btn"-->
+<!--    >-->
+<!--    </v-btn>-->
 
-    <v-menu activator="#tools_btn" open-on-hover>
-      <v-list density="compact">
-        <v-list-item
-          v-for="(item, index) in toolSelector.list"
-          :key="index"
-          :prepend-icon="item.icon"
-          @click="selectTool(index)"
-        >
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item>
+<!--    <v-menu activator="#tools_btn" open-on-hover>-->
+<!--      <v-list density="compact">-->
+<!--        <v-list-item-->
+<!--          v-for="(item, index) in toolSelector.list"-->
+<!--          :key="index"-->
+<!--          :prepend-icon="item.icon"-->
+<!--          @click="selectTool(index)"-->
+<!--        >-->
+<!--          <v-list-item-title>{{ item.title }}</v-list-item-title>-->
+<!--        </v-list-item>-->
 
-        <v-list-item prepend-icon="article" @click="docDialogCtl.dialog = true">
-          Documents
-        </v-list-item>
-      </v-list>
-    </v-menu>
+<!--        <v-list-item prepend-icon="article" @click="docDialogCtl.dialog = true">-->
+<!--          Documents-->
+<!--        </v-list-item>-->
+<!--      </v-list>-->
+<!--    </v-menu>-->
 
     <v-textarea
       ref="textArea"
@@ -53,11 +53,11 @@
     ></v-btn>
   </div>
 
-  <DocumentsManage
-    :send-message="sendMessage"
-    :control="docDialogCtl"
-    ref="documentMan"
-  />
+<!--  <DocumentsManage-->
+<!--    :send-message="sendMessage"-->
+<!--    :control="docDialogCtl"-->
+<!--    ref="documentMan"-->
+<!--  />-->
 </template>
 
 <script setup>
@@ -76,7 +76,7 @@ const rows = ref(1)
 const autoGrow = ref(true)
 
 const hint = computed(() =>
-  isMobile() ? '' : 'Press Enter to send. Shift+Enter for a new line.'
+  isMobile() ? '' : 'Нажмите Enter для отправки. Shift+Enter для новой линии.'
 )
 
 watchEffect(() => {
@@ -127,8 +127,8 @@ defineExpose({ usePrompt, refreshDocList })
 const toolSelector = ref({
   list: [
     { title: 'Chat', icon: 'add', name: 'chat', type: 0 },
-    { title: 'Web Search', icon: 'travel_explore', name: 'web_search', type: 100 },
-    { title: 'ArXiv', icon: 'local_library', name: 'arxiv', type: 110 }
+    // { title: 'Web Search', icon: 'travel_explore', name: 'web_search', type: 100 },
+    // { title: 'ArXiv', icon: 'local_library', name: 'arxiv', type: 110 }
   ],
   selected: 0
 })
@@ -144,15 +144,15 @@ function selectTool(idx) {
 
 // Локальные метки вместо $t('messageLabel.<name>')
 const toolLabelMap = {
-  chat: 'Type your message',
-  web_search: 'Type your message (web search)',
-  arxiv: 'Type your message (arXiv)'
+  chat: 'Что бы Вы хотели спросить?',
+  web_search: 'Что бы Вы хотели спросить? (Веб поиск)',
+  arxiv: 'Что бы Вы хотели спросить? (arXiv)'
 }
 
 const currentLabel = computed(() => {
   const v = toolSelector.value
   const name = v.list[v.selected].name
-  return toolLabelMap[name] ?? 'Type your message'
+  return toolLabelMap[name] ?? 'Ваш запрос'
 })
 
 const docDialogCtl = ref({ dialog: false })

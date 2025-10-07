@@ -2,15 +2,15 @@
   <div>
     <v-menu v-model="menu" :close-on-content-click="false">
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" icon>
-          <v-icon icon="speaker_notes"></v-icon>
+        <v-btn v-bind="props" color="grey" icon>
+          <v-icon icon="plus"></v-icon>
         </v-btn>
       </template>
 
       <v-container>
         <v-card min-width="300" max-width="500">
           <v-card-title>
-            <span class="headline">Saved prompts</span>
+            <span class="headline">Новый промт</span>
           </v-card-title>
 
           <v-divider></v-divider>
@@ -33,7 +33,7 @@
                     <v-text-field
                       v-model="editingPrompt.title"
                       :loading="editingPrompt.updating"
-                      label="Title"
+                      label="Заголовок"
                       variant="underlined"
                       density="compact"
                       hide-details
@@ -42,7 +42,7 @@
                       rows="2"
                       v-model="editingPrompt.prompt"
                       :loading="editingPrompt.updating"
-                      label="Prompt"
+                      label="Промт"
                       variant="underlined"
                       density="compact"
                       hide-details
@@ -98,7 +98,7 @@
                 <v-text-field
                   rows="1"
                   v-model="newTitlePrompt"
-                  label="Title"
+                  label="Заголовок"
                   variant="outlined"
                   density="compact"
                   hide-details
@@ -113,7 +113,7 @@
                 <v-textarea
                   rows="2"
                   v-model="newPrompt"
-                  label="Add a new prompt"
+                  label="Новый промт"
                   variant="outlined"
                   density="compact"
                   :error-messages="promptInputErrorMessage"
@@ -132,7 +132,7 @@
                 @click="addPrompt()"
               >
                 <v-icon icon="add"></v-icon>
-                Add prompt
+                Добавить промт
               </v-btn>
             </v-list-item>
           </v-list>
@@ -164,7 +164,7 @@ const addPrompt = async () => {
   const title = newTitlePrompt.value?.trim() || null
   const promptBody = newPrompt.value?.trim() || ''
   if (!promptBody) {
-    promptInputErrorMessage.value = 'Please enter a prompt'
+    promptInputErrorMessage.value = 'Введите значение'
     return
   }
   submittingNewPrompt.value = true

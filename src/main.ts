@@ -8,18 +8,26 @@ import 'vuetify/styles'
 import './styles/fonts.css'       // @font-face на PTSans
 import './styles/typography.css'  // var(--v-font-family) = 'PT Sans'
 
+// ВАЖНО: ставим именно font-версию mdi
+import '@mdi/font/css/materialdesignicons.css'
+
 import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
-import { aliases, mdi } from 'vuetify/iconsets/mdi'
-import '@mdi/font/css/materialdesignicons.css'
 import textVariables from '@/lang/textVariables'
+
+// наш «умный» сет
+import { createSmartIconSet } from '@/helpers/iconSetSmart'
 
 const vuetify = createVuetify({
   blueprint: md3,
   icons: {
-    defaultSet: 'mdi',
-    aliases,
-    sets: { mdi },
+    // делаем умный сет дефолтным
+    defaultSet: 'smart',
+    sets: {
+      smart: createSmartIconSet(),
+      // при желании можно подключить и стандартный 'mdi',
+      // но он не обязателен, т.к. мы рендерим <i class="mdi mdi-...">
+    },
   },
   theme: {
     defaultTheme: (localStorage.getItem('theme') as any) || 'system',
@@ -42,7 +50,6 @@ const vuetify = createVuetify({
 })
 
 const app = createApp(App)
-
 app.config.globalProperties.$textVariables = textVariables
 
 app

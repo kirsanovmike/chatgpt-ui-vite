@@ -24,7 +24,7 @@
       <v-divider />
     </template>
 
-    <!-- список диалогов (заглушки можно убрать) -->
+    <!-- список диалогов -->
     <div class="px-2">
       <v-list>
         <v-list-item v-show="loadingConversations">
@@ -35,7 +35,7 @@
       </v-list>
 
       <v-list>
-        <template v-for="(c, i) in conversations" :key="c.id">
+        <template v-for="(c, i) in conversations" :key="c.id ?? i">
           <v-list-item
             rounded="xl"
             active-color="primary"
@@ -52,7 +52,7 @@
       <v-expansion-panels>
         <v-expansion-panel rounded="rounded-pill">
           <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-close">
-            <v-icon icon="mdi-cog" class="mr-4" /> {{$textVariables.settings}}
+            <v-icon icon="mdi-cog" class="mr-4" /> {{ $textVariables.settings }}
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-list density="compact">
@@ -75,28 +75,113 @@
                 </v-list>
               </v-menu>
 
-              <!-- Пример: Параметры модели / API ключ — подключишь когда нужен бек -->
-              <!-- <ModelParameters /> -->
-              <!-- <ApiKeyDialog /> -->
-
-              <v-list-item rounded="xl" prepend-icon="mdi-help-circle-outline" :title="$textVariables.feedback"
-                           @click="window.open('https://github.com/WongSaang/chatgpt-ui/issues','_blank')" />
+              <!-- Feedback -->
+              <v-list-item
+                rounded="xl"
+                prepend-icon="mdi-help-circle-outline"
+                :title="$textVariables.feedback"
+                @click="openFeedback"
+              />
             </v-list>
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
     </template>
   </v-navigation-drawer>
+
+  <!-- Диалог обратной связи -->
+  <v-dialog v-model="feedback.dialog" max-width="560">
+    <v-card>
+      <v-card-title class="d-flex align-center">
+        <v-icon icon="mdi-message-text-outline" class="mr-3" />
+        <span>{{ $textVariables.feedback }}</span>
+      </v-card-title>
+
+      <v-progress-linear
+        v-if="feedback.loading"
+        indeterminate
+        class="mb-0"
+      />
+
+      <v-card-text class="pt-4">
+        <v-alert
+          v-if="feedback.error"
+          type="error"
+          density="comfortable"
+          variant="tonal"
+          class="mb-3"
+        >
+          {{ feedback.error }}
+        </v-alert>
+
+        <v-textarea
+          v-model="feedback.text"
+          :label="$textVariables?.yourFeedbackLabel ?? 'Ваш отзыв (до 500 символов)'"
+          :placeholder="$textVariables?.yourFeedbackPlaceholder ?? 'Коротко опишите, что понравилось или что стоит улучшить…'"
+          rows="4"
+          max-rows="10"
+          auto-grow
+          counter="500"
+          :maxlength="500"
+          :disabled="feedback.loading"
+          variant="outlined"
+        />
+
+        <div class="d-flex align-center justify-space-between mt-2">
+          <div class="text-caption opacity-70">
+            {{ feedbackCharsLeft }} {{ $textVariables?.charactersLeft ?? 'симв. осталось' }}
+          </div>
+
+          <!-- можно скрыть рейтинг, если не нужен -->
+          <div class="d-flex align-center">
+            <span class="text-body-2 mr-2">{{ $textVariables?.rating ?? 'Оценка' }}</span>
+            <v-rating
+              v-model="feedback.rating"
+              length="5"
+              size="20"
+              :disabled="feedback.loading"
+              color="primary"
+              density="comfortable"
+            />
+          </div>
+        </div>
+      </v-card-text>
+
+      <v-card-actions class="justify-end">
+        <v-btn
+          variant="text"
+          :disabled="feedback.loading"
+          @click="closeFeedback"
+        >
+          {{ $textVariables?.cancel ?? 'Отмена' }}
+        </v-btn>
+
+        <v-btn
+          color="primary"
+          :loading="feedback.loading"
+          :disabled="isSubmitDisabled"
+          @click="submitFeedback"
+        >
+          {{ $textVariables?.send ?? 'Отправить' }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Snackbar об успехе -->
+  <v-snackbar v-model="snackbar.open" :timeout="3000" location="bottom right">
+    <v-icon icon="mdi-check-circle-outline" class="mr-2" />
+    {{ snackbar.text }}
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, getCurrentInstance } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useConversations, useDrawer, useUser } from '@/composables/states'
 import { useThemeMode } from '@/composables/theme'
-import { getCurrentInstance } from 'vue'
 
-// достаём appContext
+// достаём appContext для $textVariables
 const { appContext } = getCurrentInstance()!
 const textVariables = appContext.config.globalProperties.$textVariables
 
@@ -107,10 +192,9 @@ const drawer = useDrawer()
 const user = useUser()
 const conversations = useConversations()
 
-// заглушки загрузки
+// загрузка заглушек
 const loadingConversations = ref(false)
 onMounted(async () => {
-  // тут можешь дернуть загрузку диалогов с бека; сейчас — пусто
   loadingConversations.value = false
 })
 
@@ -124,9 +208,76 @@ const themeItems = [
 
 // sign out — потом подключишь бекенд
 const signOut = async () => {
-  // await fetch('/api/account/logout/', { method: 'POST' })
-  // await logout()
   console.log('signOut() clicked')
+}
+
+/* ===========================
+   Feedback: диалог + мок API
+   =========================== */
+const feedback = ref({
+  dialog: false,
+  text: '',
+  rating: 0,
+  loading: false,
+  error: '' as string | null,
+})
+
+const snackbar = ref({ open: false, text: '' })
+
+const openFeedback = () => {
+  feedback.value.dialog = true
+  feedback.value.error = null
+}
+
+const closeFeedback = () => {
+  if (feedback.value.loading) return
+  feedback.value.dialog = false
+}
+
+const feedbackTrimmed = computed(() => feedback.value.text.trim())
+const isSubmitDisabled = computed(() =>
+  feedback.value.loading || feedbackTrimmed.value.length < 3
+)
+const feedbackCharsLeft = computed(() => 500 - feedback.value.text.length)
+
+// мок апишки
+function mockSendFeedback(payload: { message: string; rating: number }) {
+  // имитируем сетевую задержку + иногда ошибку
+  return new Promise<void>((resolve, reject) => {
+    setTimeout(() => {
+      // Смоделируй редкую ошибку:
+      // if (Math.random() < 0.1) return reject(new Error('Server unavailable'))
+      resolve()
+    }, 700)
+  })
+}
+
+async function submitFeedback() {
+  feedback.value.loading = true
+  feedback.value.error = null
+  try {
+    await mockSendFeedback({
+      message: feedbackTrimmed.value,
+      rating: feedback.value.rating,
+    })
+    feedback.value.loading = false
+    feedback.value.dialog = false
+    // очистим поле для следующего открытия
+    const wasRating = feedback.value.rating
+    feedback.value.text = ''
+    feedback.value.rating = 0
+
+    snackbar.value.text =
+      textVariables?.thanksForFeedback ?? 'Спасибо! Отзыв отправлен.'
+    if (wasRating && wasRating <= 3 && textVariables?.weWillImprove) {
+      snackbar.value.text += ' ' + textVariables.weWillImprove
+    }
+    snackbar.value.open = true
+  } catch (e: any) {
+    feedback.value.loading = false
+    feedback.value.error =
+      textVariables?.feedbackSendError ?? 'Не удалось отправить отзыв. Попробуйте ещё раз.'
+  }
 }
 </script>
 

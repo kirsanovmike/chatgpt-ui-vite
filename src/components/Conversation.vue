@@ -1,3 +1,80 @@
+<template>
+  <div v-if="conversation">
+    <div v-if="conversation.loadingMessages" class="text-center">
+      <v-progress-circular indeterminate color="primary" />
+    </div>
+
+    <div v-else>
+      <div v-if="conversation.messages" ref="chatWindow">
+        <v-container>
+          <v-row>
+            <v-col
+              v-for="(message, index) in conversation.messages"
+              :key="index"
+              cols="12"
+            >
+              <div class="d-flex align-center" :class="message.is_bot ? 'justify-start' : 'justify-end'">
+                <MessageActions
+                  v-if="!message.is_bot"
+                  :message="message"
+                  :message-index="index"
+                  :use-prompt="usePrompt"
+                  :delete-message="deleteMessage"
+                  :toggle-message="toggleMessage"
+                />
+                <MsgContent
+                  :message="message"
+                  :index="index"
+                  :use-prompt="usePrompt"
+                  :delete-message="deleteMessage"
+                />
+                <MessageActions
+                  v-if="message.is_bot"
+                  :message="message"
+                  :message-index="index"
+                  :use-prompt="usePrompt"
+                  :delete-message="deleteMessage"
+                />
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <div ref="grab" class="w-100" style="height: 200px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <v-footer app class="footer py-5">
+    <div class="px-md-4 w-100 d-flex flex-column">
+      <div class="d-flex align-center">
+        <Prompt v-show="!fetchingResponse" :use-prompt="usePrompt" class="mr-3" />
+        <MsgEditor
+          ref="editor"
+          :send-message="send"
+          :disabled="fetchingResponse"
+          :loading="fetchingResponse"
+        />
+        <v-btn
+          v-show="fetchingResponse"
+          icon="close"
+          title="Stop"
+          class="mr-3"
+          @click="stop"
+        />
+      </div>
+
+    </div>
+  </v-footer>
+
+  <v-snackbar v-model="snackbar" multi-line location="top">
+    {{ snackbarText }}
+    <template #actions>
+      <v-btn color="red" variant="text" @click="snackbar = false">Close</v-btn>
+    </template>
+  </v-snackbar>
+</template>
+
 <script setup lang="ts">
 // ==============================
 // Conversation.vue (Vite + TS)
@@ -8,15 +85,7 @@ import MsgContent from '@/components/MsgContent.vue'
 import MsgEditor from '@/components/MsgEditor.vue'
 import Prompt from '@/components/Prompt.vue'
 
-// остальной ваш код Conversation.vue
-
 import { inject, onMounted, ref } from 'vue'
-
-// Если эти компоненты не зарегистрированы глобально — раскомментируй импорты:
-// import MessageActions from '@/components/MessageActions.vue'
-// import MsgContent from '@/components/MsgContent.vue'
-// import MsgEditor from '@/components/MsgEditor.vue'
-// import Prompt from '@/components/Prompt.vue'
 
 // ---------- Типы ----------
 type ChatMessage = {
@@ -249,119 +318,6 @@ onMounted(() => {
   currentModel.value = getCurrentModel()
 })
 </script>
-
-<template>
-  <div v-if="conversation">
-    <div v-if="conversation.loadingMessages" class="text-center">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
-
-    <div v-else>
-      <div v-if="conversation.messages" ref="chatWindow">
-        <v-container>
-          <v-row>
-            <v-col
-              v-for="(message, index) in conversation.messages"
-              :key="index"
-              cols="12"
-            >
-              <div class="d-flex align-center" :class="message.is_bot ? 'justify-start' : 'justify-end'">
-                <MessageActions
-                  v-if="!message.is_bot"
-                  :message="message"
-                  :message-index="index"
-                  :use-prompt="usePrompt"
-                  :delete-message="deleteMessage"
-                  :toggle-message="toggleMessage"
-                />
-                <MsgContent
-                  :message="message"
-                  :index="index"
-                  :use-prompt="usePrompt"
-                  :delete-message="deleteMessage"
-                />
-                <MessageActions
-                  v-if="message.is_bot"
-                  :message="message"
-                  :message-index="index"
-                  :use-prompt="usePrompt"
-                  :delete-message="deleteMessage"
-                />
-              </div>
-            </v-col>
-          </v-row>
-        </v-container>
-
-        <div ref="grab" class="w-100" style="height: 200px;"></div>
-      </div>
-    </div>
-  </div>
-
-  <v-footer app class="footer">
-    <div class="px-md-16 w-100 d-flex flex-column">
-      <div class="d-flex align-center">
-        <v-btn
-          v-show="fetchingResponse"
-          icon="close"
-          title="Stop"
-          class="mr-3"
-          @click="stop"
-        />
-        <MsgEditor
-          ref="editor"
-          :send-message="send"
-          :disabled="fetchingResponse"
-          :loading="fetchingResponse"
-        />
-      </div>
-
-      <v-toolbar density="comfortable" color="transparent">
-        <Prompt v-show="!fetchingResponse" :use-prompt="usePrompt" />
-
-        <v-switch
-          v-if="settings?.open_web_search === 'True'"
-          v-model="enableWebSearch"
-          inline
-          hide-details
-          color="primary"
-          label="Web search"
-        />
-
-        <v-spacer />
-
-        <div v-if="settings?.open_frugal_mode_control === 'True'" class="d-flex align-center">
-          <v-switch
-            v-model="frugalMode"
-            inline
-            hide-details
-            color="primary"
-            label="Frugal mode"
-          />
-          <v-dialog transition="dialog-bottom-transition" width="auto">
-            <template #activator="{ props }">
-              <v-icon color="grey" v-bind="props" icon="help_outline" class="ml-3" />
-            </template>
-            <template #default="{ isActive }">
-              <v-card>
-                <v-toolbar color="primary" title="Frugal mode" />
-                <v-card-text>
-                  Отвечает экономнее: сокращает длину ответа и реже вызывает инструменты/поиск.
-                </v-card-text>
-              </v-card>
-            </template>
-          </v-dialog>
-        </div>
-      </v-toolbar>
-    </div>
-  </v-footer>
-
-  <v-snackbar v-model="snackbar" multi-line location="top">
-    {{ snackbarText }}
-    <template #actions>
-      <v-btn color="red" variant="text" @click="snackbar = false">Close</v-btn>
-    </template>
-  </v-snackbar>
-</template>
 
 <style scoped>
 .footer { width: 100%; }
