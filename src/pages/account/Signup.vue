@@ -87,7 +87,10 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'vuetify-app' })
+// definePageMeta({ layout: 'vuetify-app' })
+
+import {useUser} from "@/composables/states.js";
+import {ref} from "vue";
 
 const user = useUser()
 

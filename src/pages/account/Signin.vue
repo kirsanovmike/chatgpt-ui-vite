@@ -59,10 +59,12 @@
 
 <script setup>
 import { useUser } from '@/composables/states'
+import {ref} from "vue";
+import {useRoute} from "vue-router";
 
-definePageMeta({
-  layout: 'vuetify-app'
-})
+// definePageMeta({
+//   layout: 'vuetify-app'
+// })
 
 const formData = ref({
   username: '',

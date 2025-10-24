@@ -41,12 +41,14 @@
 </template>
 
 <script setup>
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
+import {useRoute} from "vue-router";
+import {useUser} from "@/composables/states.js";
 
-definePageMeta({
-  layout: 'vuetify-app',
-  middleware: ['auth']
-})
+// definePageMeta({
+//   layout: 'vuetify-app',
+//   middleware: ['auth']
+// })
 
 const route = useRoute()
 const sending = ref(false)

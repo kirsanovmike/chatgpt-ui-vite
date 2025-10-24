@@ -44,13 +44,15 @@
 </template>
 
 <script setup>
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
+import {useRoute} from "vue-router";
+import {navigateTo} from "@/compat/router.js";
 
-definePageMeta({
-  layout: 'vuetify-app',
-  path: '/account/verify-email/:token',
-  title: 'Verify Email'
-})
+// definePageMeta({
+//   layout: 'vuetify-app',
+//   path: '/account/verify-email/:token',
+//   title: 'Verify Email'
+// })
 
 const route = useRoute()
 const verifying = ref(false)

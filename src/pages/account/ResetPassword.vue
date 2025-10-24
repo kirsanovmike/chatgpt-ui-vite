@@ -76,9 +76,12 @@
 </template>
 
 <script setup>
-definePageMeta({
-  middleware: ['auth']
-})
+// definePageMeta({
+//   middleware: ['auth']
+// })
+
+import {ref} from "vue";
+import {logout} from "@/utils/helper.js";
 
 const formData = ref({
   old_password: '',
