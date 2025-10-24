@@ -198,7 +198,7 @@ const fetchReply = async (message: { content: string; tool?: string; message_typ
       messageQueue.push(`Echo: ${Array.isArray(message) ? message.at(-1)?.content ?? '' : message.content}`)
       processMessageQueue()
       fetchingResponse.value = false
-    }, 250)
+    }, 2700)
     return
   }
 

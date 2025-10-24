@@ -8,7 +8,7 @@
             {{ $textVariables.welcomeTo }} <span class="text-primary">{{ APP_NAME }}</span>
           </h2>
           <p class="text-body-2 text-medium-emphasis mt-4">
-            {{ APP_NAME }} помогает вам общаться с большими языковыми моделями.
+            {{ APP_NAME }} помогает вам общаться с большими языковыми моделями
           </p>
         </div>
       </v-col>

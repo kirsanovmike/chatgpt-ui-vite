@@ -7,7 +7,7 @@
     <v-spacer />
 
     <v-btn
-      title="New conversation"
+      title="Новый чат"
       icon="add"
       class="d-md-none ma-3"
       @click="createNewConversation"
@@ -84,7 +84,7 @@ const createNewConversation = () => {
     router.push({ path: '/', query: { new: '1' } })
     return
   }
-  conversation.value = { ...getDefaultConversationData(), topic: 'New conversation' }
+  conversation.value = { ...getDefaultConversationData(), topic: 'Новый чат' }
 }
 
 // ===== Жизненный цикл / реактивность =====
@@ -125,7 +125,7 @@ watch(
 const navTitle = computed(() => {
   const topic = conversation.value.topic
   if (topic !== null && topic !== undefined) {
-    return topic === '' ? 'New conversation' : topic
+    return topic === '' ? 'Новый чат' : topic
   }
   return APP_NAME
 })

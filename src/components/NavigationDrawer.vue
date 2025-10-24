@@ -41,7 +41,7 @@
             active-color="primary"
             :to="c.id ? `/${c.id}` : '/'"
           >
-            <v-list-item-title>{{ c.topic && c.topic !== '' ? c.topic : 'New conversation' }}</v-list-item-title>
+            <v-list-item-title>{{ c.topic && c.topic !== '' ? c.topic : 'Новый чат' }}</v-list-item-title>
           </v-list-item>
         </template>
       </v-list>
