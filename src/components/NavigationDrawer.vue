@@ -2,8 +2,9 @@
 <template>
   <v-navigation-drawer
       v-model="drawer" :permanent="mdAndUp" width="300"
-      color="sidebar-bg"
+      color="transparent"
       elevation="0"
+      class="app-drawer"
   >
     <!-- user header (можно скрыть если нет user) -->
     <template v-if="user" #prepend>
@@ -30,66 +31,61 @@
 
     <!-- список диалогов -->
     <div class="px-2">
-      <v-list>
-        <v-list-item v-show="loadingConversations">
-          <v-list-item-title class="d-flex justify-center">
-            <v-progress-circular indeterminate />
-          </v-list-item-title>
-        </v-list-item>
-      </v-list>
-
-      <v-list>
-        <template v-for="(c, i) in conversations" :key="c.id ?? i">
-          <v-list-item
-            rounded="xl"
-            active-color="primary"
-            :to="c.id ? `/${c.id}` : '/'"
-          >
-            <v-list-item-title>{{ c.topic && c.topic !== '' ? c.topic : 'Новый чат' }}</v-list-item-title>
+      <div class="drawer-card glass-card">
+        <v-list>
+          <v-list-item v-show="loadingConversations">
+            <v-list-item-title class="d-flex justify-center">
+              <v-progress-circular indeterminate />
+            </v-list-item-title>
           </v-list-item>
-        </template>
-      </v-list>
+        </v-list>
+
+        <v-list>
+          <template v-for="(c, i) in conversations" :key="c.id ?? i">
+            <v-list-item
+              rounded="xl"
+              active-color="primary"
+              :to="c.id ? `/${c.id}` : '/'"
+            >
+              <v-list-item-title>{{ c.topic && c.topic !== '' ? c.topic : 'Новый чат' }}</v-list-item-title>
+            </v-list-item>
+          </template>
+        </v-list>
+      </div>
     </div>
 
     <template #append>
-      <v-divider />
-      <v-expansion-panels multiple v-model="open">
-        <v-expansion-panel rounded="rounded-pill">
-          <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-close">
-            <v-icon icon="mdi-cog" class="mr-4" /> {{ $textVariables.settings }}
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <v-list density="compact">
-              <!-- Theme -->
-              <v-menu>
-                <template #activator="{ props }">
-                  <v-list-item v-bind="props" rounded="xl" :title="$textVariables.theme">
-                    <template #prepend>
-                      <v-icon v-if="theme.mode === 'light'" icon="mdi-white-balance-sunny" />
-                      <v-icon v-else-if="theme.mode === 'dark'" icon="mdi-weather-night" />
-                      <v-icon v-else icon="mdi-theme-light-dark" />
-                    </template>
-                  </v-list-item>
-                </template>
+      <div class="drawer-settings glass-card mx-2 mb-2">
+        <v-expansion-panels multiple v-model="open">
+          <v-expansion-panel rounded="rounded-pill">
+            <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-close">
+              <v-icon icon="mdi-cog" class="mr-4" /> {{ $textVariables.settings }}
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <v-list density="compact">
+                <!-- Theme -->
+                <v-menu>
+                  <template #activator="{ props }">
+                    <v-list-item v-bind="props" rounded="xl" :title="$textVariables.theme">
+                      <template #prepend>
+                        <v-icon v-if="theme.mode === 'light'" icon="mdi-white-balance-sunny" />
+                        <v-icon v-else-if="theme.mode === 'dark'" icon="mdi-weather-night" />
+                        <v-icon v-else icon="mdi-theme-light-dark" />
+                      </template>
+                    </v-list-item>
+                  </template>
 
-                <v-list>
-                  <v-list-item v-for="t in themeItems" :key="t.value" @click="theme.setMode(t.value)">
-                    <v-list-item-title>{{ t.title }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-
-<!--               Feedback-->
-<!--              <v-list-item-->
-<!--                rounded="xl"-->
-<!--                prepend-icon="mdi-help-circle-outline"-->
-<!--                :title="$textVariables.feedback"-->
-<!--                @click="openFeedback"-->
-<!--              />-->
-            </v-list>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+                  <v-list>
+                    <v-list-item v-for="t in themeItems" :key="t.value" @click="theme.setMode(t.value)">
+                      <v-list-item-title>{{ t.title }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-list>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </div>
     </template>
   </v-navigation-drawer>
 
@@ -291,4 +287,26 @@ async function submitFeedback() {
 .v-navigation-drawer__content::-webkit-scrollbar { width: 0; }
 .v-navigation-drawer__content:hover::-webkit-scrollbar { width: 6px; }
 .v-navigation-drawer__content:hover::-webkit-scrollbar-thumb { background-color: #999; border-radius: 3px; }
+</style>
+<style scoped>
+.app-drawer {
+  background: transparent !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.drawer-card,
+.drawer-settings {
+  border-radius: 18px;
+  padding: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
+}
+
+.drawer-card {
+  margin-top: 12px;
+}
+
+.drawer-settings {
+  margin-top: 8px;
+}
 </style>

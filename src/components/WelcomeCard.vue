@@ -6,6 +6,7 @@
           :elevation="isHovering ? 3 : 0"
           v-bind="props"
           variant="tonal"
+          class="glass-card welcome-card"
         >
           <v-card-text class="text-center">
             {{ content }}
