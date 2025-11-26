@@ -4,16 +4,17 @@
         ref="textArea"
         v-model="message"
         :label="currentLabel"
-        :placeholder="hint"
+        :placeholder="placeholderText"
         :rows="rows"
         max-rows="8"
         :auto-grow="autoGrow"
         :disabled="disabled"
         :loading="loading"
-        :hide-details="true"
+        :hide-details="hintText ? 'auto' : true"
         clearable
         variant="outlined"
         class="userinputmsg"
+        v-model:focused="isFocused"
         @keypress.enter.exact="enterOnly"
         :error-messages="errorMessage"
         :error="!!errorMessage"
@@ -60,9 +61,16 @@ const maxLengthRule = (value) => {
   return true
 }
 
-const hint = computed(() =>
+const hintText = computed(() =>
     isMobile() ? '' : 'Нажмите Enter для отправки. Shift+Enter для новой линии.'
 )
+
+const isFocused = ref(false)
+const placeholderText = computed(() => {
+  if (props.disabled) return ''
+  const hasText = (message.value?.length ?? 0) > 0
+  return isFocused.value && !hasText ? hintText.value : ''
+})
 
 watchEffect(() => {
   const lines = message.value.split(/\r\n|\r|\n/).length

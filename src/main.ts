@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 import 'vuetify/styles'
 import './styles/fonts.css'       // @font-face на PTSans
 import './styles/typography.css'  // var(--v-font-family) = 'PT Sans'
+import './styles/glass.css'
 
 // ВАЖНО: ставим именно font-версию mdi
 import '@mdi/font/css/materialdesignicons.css'

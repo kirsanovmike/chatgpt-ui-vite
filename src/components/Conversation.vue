@@ -8,7 +8,7 @@
       <div ref="chatWindow">
         <Teleport to="#portal-target">
           <!-- Селект выбора моделей -->
-          <div class="model-select-container mt-1">
+          <div class="model-select-container mt-1 glass-chip">
             <v-select
                 v-model="selectedModel"
                 :items="models"
@@ -24,7 +24,7 @@
           </div>
         </Teleport>
 
-        <v-container style="padding-left: 90px; padding-right: 90px;">
+        <v-container class="chat-container">
           <v-row>
             <v-col
                 v-for="(message, index) in conversation.messages"
@@ -82,21 +82,17 @@
     </div>
   </div>
 
-  <v-footer
-      style="display: block;
-      border-top: 1px solid rgb(var(--v-theme-surface));
-      background-color: rgb(var(--v-theme-header-bg));" app class="footer py-5">
-    <div v-if="systemPrompt" class="d-flex align-center mb-6 ml-3 py-1 system-prompt-label" style="width: fit-content">
-      <span class="mr-2 text-body-1">{{ systemPrompt.title }}</span>
-      <v-btn icon="close" color="transparent" size="dense" elevation="0" @click="clearSystemPrompt" />
-    </div>
-    <div class="px-md-4 w-100 d-flex flex-column">
-      <div class="d-flex align-center">
-        <!--        <Prompt v-show="!fetchingResponse" :use-prompt="usePrompt" class="mr-3" />-->
+  <v-footer app class="footer chat-footer py-5">
+    <div class="px-md-4 w-100 d-flex flex-column gap-4">
+      <div v-if="systemPrompt" class="d-flex align-center system-prompt-label glass-chip">
+        <span class="mr-2 text-body-1">{{ systemPrompt.title }}</span>
+        <v-btn icon="close" color="transparent" size="dense" elevation="0" @click="clearSystemPrompt" />
+      </div>
+      <div class="chat-input-shell glass-card">
         <v-btn
             v-show="!fetchingResponse"
             icon="view_list"
-            class="mr-4"
+            class="prompt-trigger glass-chip"
             elevation="0"
             @click="dialogAll = true"
         />
@@ -105,12 +101,13 @@
             :send-message="send"
             :disabled="fetchingResponse"
             :loading="fetchingResponse"
+            class="flex-grow-1"
         />
         <v-btn
             v-show="fetchingResponse"
             icon="close"
             title="Stop"
-            class="ml-4"
+            class="glass-chip"
             elevation="0"
             @click="stop"
         />
@@ -127,8 +124,10 @@
   <!-- Диалог «Все готовые промты» -->
   <PromptsDialog
       v-model="dialogAll"
-      :prompts="prompts"
-      @use="systemPrompt = $event"
+      :system-prompts="systemPrompts"
+      :ready-prompts="readyPrompts"
+      @use="applySystemPrompt"
+      @apply-ready="applyReadyPrompt"
   />
 </template>
 
@@ -142,9 +141,8 @@ import PromptsDialog from './PromtsDialog.vue'
 
 import {inject, ref} from 'vue'
 
-import Llm from "@/api/Llm"
-import {AuthorRole} from "@/data/enums/AuthorRole";
-import {trimMessagesByTokens} from "@/helpers/llm";
+import {AuthorRole} from "@/data/enums/AuthorRole.js";
+import Llm, {trimMessagesByTokens} from "@/helpers/llm";
 
 // ---------- Типы ----------
 type ChatMessage = {
@@ -162,7 +160,7 @@ type ConversationT = {
 
 const dialogAll = ref(false)
 
-const prompts = [
+const systemPrompts = [
   {
     title: "Ассистент по переписке",
     full: "Ты — ассистент сотрудника компании. Помогаешь формулировать письма, ответы в мессенджерах и служебные записки. Пиши вежливо, по-деловому, кратко и по-русски, без канцелярита и лишних эмоций. Всегда предлагай 1–2 варианта формулировок на выбор."
@@ -174,6 +172,54 @@ const prompts = [
   {
     title: "Помощь в рабочих ситуациях",
     full: "Ты — рабочий ассистент, который помогает разобраться в типичных ситуациях. Помогаешь спокойно разложить проблему по пунктам, предложить варианты действий, составить чек-лист или план разговора с коллегами/руководителем. Пиши доброжелательно, без оценок, с упором на здравый смысл и конструктив."
+  }
+]
+
+const readyPrompts = [
+  {
+    id: 'anti-manipulation',
+    title: 'Мастер-класс по защите от манипуляций',
+    tags: ['Психология', 'Безопасность'],
+    text: `Ты ведущий эксперт по психологической безопасности и противодействию манипуляциям с опытом работы более 20 лет.
+
+Исходные данные  
+Сфера, где чаще сталкиваюсь с манипуляциями: [работа]  
+Мои слабые места: [жалость к людям, страх конфликтов, желание понравиться]  
+Мой уровень знаний о манипуляциях: [базовый]
+
+Задание  
+Создай персональную программу защиты от манипулятивного воздействия:
+
+– Диагностика — Топ-5 манипулятивных техник, которым я наиболее подвержен.  
+– Распознавание — Ключевые сигналы и красные флаги для моих ситуаций.  
+– Защита — 10 универсальных фраз-щитов от манипуляций в моей сфере.  
+– Тренировка — 5 упражнений для развития иммунитета к воздействию.  
+– Экстренная помощь — Алгоритм действий, если манипуляция уже началась.  
+– План роста — 30-дневная программа прокачки навыков защиты.
+
+Все рекомендации адаптируй под мою специфику. Добавь примеры из реальной жизни. Не давай дисклеймер о себе в конце.`
+  },
+  {
+    id: 'breaks',
+    title: 'Как правильно делать перерывы, чтобы не терять концентрацию',
+    tags: ['Психология', 'Карьера'],
+    text: `Роль  
+Ты — нейропсихолог с 15-летним опытом, специализирующийся на продуктивности, внимании и устойчивой работоспособности. Объясни простым языком, почему регулярные перерывы важны для поддержания концентрации, и предложи практическую стратегию отдыха, учитывая следующие данные:
+
+Тип деятельности: [работа за компьютером]  
+Продолжительность рабочего/учебного блока: [целый день]  
+Возраст: [36 лет]  
+Уровень усталости до начала задачи: [средний]  
+Есть ли хронические состояния (по желанию): [мигрени]
+
+Расскажи:
+– почему мозг (или тело) нуждается в паузах при такой нагрузке — коротко и без сложной терминологии;  
+– какой тип перерывов наиболее эффективен в этом случае: активные, пассивные, смена деятельности, цифровой детокс и т. п.;  
+– оптимальная длительность и частота перерывов (например, каждые 45 минут по 7 минут);  
+– конкретные действия во время перерыва, которые реально восстанавливают энергию (до 5 примеров);  
+– чего точно стоит избегать в перерывах, чтобы не свести пользу на нет.
+
+Ответ оформи как совет от эксперта — дружелюбно, но авторитетно, без воды. Добавь одну метафору, чтобы суть была понятна с первого раза (например: «Мозг — как мышца, он устаёт от постоянного напряжения»).`
   }
 ]
 
@@ -250,6 +296,14 @@ const clearSystemPrompt = () => {
   systemPrompt.value = null
 }
 
+const applySystemPrompt = (prompt: { title: string; full: string }) => {
+  systemPrompt.value = prompt
+}
+
+const applyReadyPrompt = (prompt: string) => {
+  editor.value?.usePrompt?.(prompt)
+}
+
 // ---------- Модели ----------
 const models = [
   { name: 'Для кода', value: 'qwen3-coder:30b' },
@@ -265,6 +319,11 @@ const onModelChange = (model: string) => {
 </script>
 
 <style scoped>
+.chat-container {
+  max-width: 1280px;
+  padding-inline: clamp(16px, 4vw, 90px);
+}
+
 .content_and_action {
   position: relative;
 }
@@ -292,13 +351,45 @@ const onModelChange = (model: string) => {
 }
 
 .system-prompt-label {
-  font-size: 0.8rem;
-  color: rgb(var(--v-theme-system-prompt));
-  padding: 4px 8px;
-  border: 8px solid rgb(var(--v-theme-system-prompt));
-  border-radius: 4px;
-  background-color: rgb(var(--v-theme-primary-lighten));;
-  display: inline-block;
+  font-size: 0.9rem;
+  color: rgb(var(--v-theme-on-surface));
+  padding: 8px 12px;
+  border-radius: 14px;
+  gap: 8px;
+  width: fit-content;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.chat-footer {
+  display: block;
+  border-top: none;
+  background: transparent !important;
+}
+
+.chat-input-shell {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 20px;
+}
+
+.chat-input-shell :deep(.v-field) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.chat-input-shell :deep(.v-field__outline) {
+  --v-field-border-opacity: 0.24;
+}
+
+.chat-input-shell :deep(.v-btn) {
+  box-shadow: none;
+}
+
+.prompt-trigger {
+  width: 44px;
+  height: 44px;
 }
 
 /* Анимация печати */
@@ -311,7 +402,7 @@ const onModelChange = (model: string) => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #999;
+  background-color: rgba(var(--v-theme-on-surface), 0.5);
   margin: 0 2px;
   animation: typing 1.4s infinite ease-in-out;
 }
@@ -340,11 +431,27 @@ const onModelChange = (model: string) => {
 /* Селект модели */
 .model-select-container {
   z-index: 1000;
-  width: 250px;
+  width: 260px;
+  border-radius: 18px;
+  padding: 8px 10px;
 }
 
-.model-select {
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.model-select :deep(.v-field) {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 960px) {
+  .chat-container {
+    padding-inline: 16px;
+  }
+
+  .chat-input-shell {
+    flex-wrap: wrap;
+  }
+
+  .prompt-trigger {
+    order: 3;
+  }
 }
 </style>
