@@ -48,7 +48,7 @@
         class="switcher__input"
         type="radio"
         name="theme"
-        value="dim"
+        value="system"
         c-option="3"
       />
       <svg class="switcher__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 36 36">
@@ -82,7 +82,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useThemeMode } from '@/composables/theme'
 
-type ThemeName = 'light' | 'dark' | 'dim'
+type ThemeName = 'light' | 'dark' | 'system'
 
 const { mode, setMode } = useThemeMode()
 const selected = ref<ThemeName>(mode.value || 'light')

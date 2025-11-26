@@ -30,16 +30,16 @@ body:has(input.switcher__input[value="dark"]:checked) {
   --saturation: 150%;
 }
 
-body:has(input.switcher__input[value="dim"]:checked) {
-  --c-bg: #152433;
-  --c-content: #d5dbe2;
-  --c-action: #ff48a9;
-  --c-glass: hsl(335 250% 74% / 1);
-  --c-light: #99deff;
-  --c-dark: #20001b;
-  --glass-reflex-dark: 2;
-  --glass-reflex-light: 0.7;
-  --saturation: 200%;
+body:has(input.switcher__input[value="system"]:checked) {
+  --c-bg: #e8e8e9;
+  --c-content: #222244;
+  --c-action: #0052f5;
+  --c-glass: #bbbbbc;
+  --c-light: #ffffff;
+  --c-dark: #000000;
+  --glass-reflex-dark: 1;
+  --glass-reflex-light: 1;
+  --saturation: 150%;
 }
 
 .switcher {

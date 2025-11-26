@@ -21,34 +21,56 @@ import { createSmartIconSet } from '@/helpers/iconSetSmart'
 import { createVuetify, type ThemeDefinition } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
 
-const baseColors = {
-  background: 'var(--c-bg)',
-  surface: 'color-mix(in srgb, var(--c-bg) 92%, transparent)',
-  'surface-variant': 'color-mix(in srgb, var(--c-bg) 88%, transparent)',
-  primary: 'var(--c-action)',
-  'primary-lighten': 'color-mix(in srgb, var(--c-action) 35%, var(--c-light))',
-  secondary: 'color-mix(in srgb, var(--c-glass) 60%, transparent)',
-  'on-background': 'var(--c-content)',
-  'on-surface': 'var(--c-content)',
-  'on-surface-variant': 'color-mix(in srgb, var(--c-content) 70%, transparent)',
-  'sidebar-bg': 'color-mix(in srgb, var(--c-bg) 90%, transparent)',
-  'header-bg': 'color-mix(in srgb, var(--c-bg) 94%, transparent)',
-  'chat-card': 'color-mix(in srgb, var(--c-bg) 96%, transparent)'
+const darkTheme: ThemeDefinition = {
+  dark: true,
+  colors: {
+    background: '#212121',
+
+    // Поверхности / карточки
+    surface: '#212121',
+    'surface-variant': '#262626',
+
+    // Акцент (кнопки, ссылки)
+    primary: '#5575df',      // можешь поменять, если не нравится «чатгпт-зелёный»
+    'primary-lighten': '#2b3863',
+    secondary: '#3F3F46',
+
+    // Цвета текста
+    'on-background': '#E5E5E5',
+    'on-surface': '#E5E5E5',
+    'on-surface-variant': '#A3A3A3',
+
+    // Свои именованные цвета под layout
+    'sidebar-bg': '#111111', // левая панель
+    'header-bg': '#272727',
+    'chat-card': '#212121',  // фон сообщений
+  },
 }
 
 const lightTheme: ThemeDefinition = {
   dark: false,
-  colors: baseColors
-}
+  colors: {
+    background: 'rgba(247,247,248,0.63)',
 
-const darkTheme: ThemeDefinition = {
-  dark: true,
-  colors: baseColors
-}
+    // поверхности / карточки
+    surface: 'rgba(247,247,248,0.63)',
+    'surface-variant': '#F2F2F3',
 
-const dimTheme: ThemeDefinition = {
-  dark: true,
-  colors: baseColors
+    // акцент
+    primary: '#5575df',
+    'primary-lighten': '#dee7ff',
+    secondary: '#E5E7EB',
+
+    // текст
+    'on-background': '#202123',
+    'on-surface': '#202123',
+    'on-surface-variant': '#6B7280',
+
+    // layout
+    'sidebar-bg': '#dddddd',
+    'header-bg': '#f5f5f5',
+    'chat-card': '#FFFFFF',
+  },
 }
 
 const vuetify = createVuetify({
@@ -63,11 +85,14 @@ const vuetify = createVuetify({
     },
   },
   theme: {
-    defaultTheme: (localStorage.getItem('theme') as any) || 'light',
+    defaultTheme: (localStorage.getItem('theme') as any) || 'dark',
     themes: {
       light: lightTheme,
       dark: darkTheme,
-      dim: dimTheme
+      system: {
+        dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+        colors: {},
+      },
     },
   },
   defaults: {

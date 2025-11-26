@@ -2,9 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 
-type ThemeName = 'light' | 'dark' | 'dim'
+type ThemeName = 'light' | 'dark' | 'system'
 
-const mode = ref<ThemeName>((localStorage.getItem('theme') as ThemeName) || 'light')
+const mode = ref<ThemeName>((localStorage.getItem('theme') as ThemeName) || 'system')
 
 export function useThemeMode() {
   const theme = useTheme()
@@ -12,7 +12,13 @@ export function useThemeMode() {
   const apply = (name: ThemeName) => {
     mode.value = name
     localStorage.setItem('theme', name)
-    theme.global.name.value = name
+
+    if (name === 'system') {
+      const isDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+      theme.global.name.value = isDark ? 'dark' : 'light'
+    } else {
+      theme.global.name.value = name
+    }
   }
 
   onMounted(() => apply(mode.value))
