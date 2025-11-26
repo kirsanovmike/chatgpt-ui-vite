@@ -74,7 +74,8 @@
                 class="text-none ml-2"
                 color="primary"
                 density="comfortable"
-                @click="emit('use', p.full)"
+                elevation="0"
+                @click="handleUseClick(p)"
               >
                 Использовать
               </v-btn>
@@ -108,7 +109,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
-  (e: 'use', content: string): void
+  (e: 'use', content: any): void
 }>()
 
 const expandedIdx = ref<number | null>(null)
@@ -147,6 +148,11 @@ const onLeave = (el: Element) => {
     node.style.height = '0px'
     node.style.opacity = '0'
   })
+}
+
+const handleUseClick = (p) => {
+  emit('use', p)
+  emit('update:modelValue', false)
 }
 </script>
 

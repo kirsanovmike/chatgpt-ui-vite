@@ -1,10 +1,18 @@
 <template>
-  <v-app-bar>
-    <v-app-bar-nav-icon @click="toggleDrawer" />
+  <v-app-bar class="ai-app-bar d-flex"
+             style="
+               border-bottom: 1px solid rgb(var(--v-theme-surface));
+               background-color: rgb(var(--v-theme-header-bg));
+               box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.05);
+             "
+  >
+    <div class="d-flex align-center">
+      <v-app-bar-nav-icon @click="toggleDrawer" />
 
-    <v-toolbar-title>{{ navTitle }}</v-toolbar-title>
+      <v-toolbar-title>{{ navTitle }}</v-toolbar-title>
+    </div>
 
-    <v-spacer />
+    <div id="portal-target"></div>
 
     <v-btn
       title="Новый чат"
@@ -131,6 +139,13 @@ const navTitle = computed(() => {
 })
 </script>
 
-<style scoped>
+<style>
 /* стили по желанию */
+.ai-app-bar.v-toolbar {
+  .v-toolbar__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
 </style>

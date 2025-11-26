@@ -37,7 +37,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="dialog = false">Закрыть</v-btn>
-        <v-btn color="primary" variant="flat" @click="usePrompt">Использовать</v-btn>
+        <v-btn color="primary" elevation="0" class="elevation-0" variant="flat" @click="usePrompt">Использовать</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

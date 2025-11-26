@@ -13,7 +13,7 @@ export const useMainStore = defineStore('main', {
     drawer: false,
     conversations: [] as any[],
     apiKey: null as string | null,
-    currentModelName: 'gpt-3.5-turbo'
+    currentModelName: ''
   }),
   actions: {
     setUser(u: User | null) { this.user = u },

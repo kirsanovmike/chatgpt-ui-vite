@@ -46,3 +46,9 @@
 .font-inherit {
   font-family: inherit !important;
 }
+
+html,
+body,
+#app {
+    background-color: rgb(var(--v-theme-background));
+}

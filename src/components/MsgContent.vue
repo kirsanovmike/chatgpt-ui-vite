@@ -1,19 +1,35 @@
 <template>
   <v-card
-    :color="message.is_bot ? '' : 'primary'"
-    rounded="lg"
-    elevation="2"
-    :class="{ card_disabled: message.is_disabled }"
+      :color="message.role === AuthorRole.Assistant ? '' : 'primary'"
+      rounded="xl"
+      :elevation="message.role === AuthorRole.Assistant ? 0 : 2"
+      :class="{ card_disabled: message.is_disabled }"
+      class="px-2"
   >
-    <div
-      ref="contentElm"
-      v-html="contentHtml"
-      class="chat-msg-content pa-3"
-    ></div>
+    <div ref="contentElm" class="px-2 py-2">
+      <!-- системные указания только для сообщений пользователя -->
+      <template v-if="hasSystemPrompt">
+        <v-expansion-panels rounded="xl" variant="accordion" elevation="0" class="mb-2" bg-color="grey-lighten-4">
+          <v-expansion-panel>
+            <v-expansion-panel-title class="text-caption" :min-height="32" height="32">
+              Системные указания
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <div
+                  class="chat-msg-content"
+                  v-html="systemContentHtml"
+              ></div>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </template>
 
-    <v-divider
-      :color="message.is_bot ? 'rgb(var(--v-theme-on-background))' : 'rgb(var(--v-theme-on-primary))'"
-    ></v-divider>
+      <!-- основной текст сообщения -->
+      <div
+          class="chat-msg-content"
+          v-html="userContentHtml"
+      />
+    </div>
   </v-card>
 </template>
 
@@ -22,7 +38,11 @@ import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
 import copy from 'copy-to-clipboard'
 import mathjax3 from 'markdown-it-mathjax3'
-import {nextTick, onMounted, ref, watchEffect} from "vue";
+import { computed, nextTick, onMounted, ref, watchEffect } from 'vue'
+import { AuthorRole } from '@/data/enums/AuthorRole.js'
+
+const SYSTEM_PREFIX = 'Системные указания:'
+const USER_PREFIX = 'Вопрос пользователя:'
 
 const md = new MarkdownIt({
   linkify: true,
@@ -40,11 +60,46 @@ const props = defineProps({
   deleteMessage: { type: Function, required: true }
 })
 
-const contentHtml = ref('')
+const systemContentHtml = ref('')
+const userContentHtml = ref('')
 const contentElm = ref(null)
 
+// парсим строку в system + user; для ассистента возвращаем всё как user
+const parsedMessage = computed(() => {
+  const raw = props.message?.content || ''
+
+  if (props.message.role !== AuthorRole.User) {
+    return { system: null, user: raw }
+  }
+
+  const sysIndex = raw.indexOf(SYSTEM_PREFIX)
+  const userIndex = raw.indexOf(USER_PREFIX)
+
+  if (sysIndex === -1 || userIndex === -1 || userIndex <= sysIndex) {
+    return { system: null, user: raw }
+  }
+
+  const sysStart = sysIndex + SYSTEM_PREFIX.length
+  const system = raw.slice(sysStart, userIndex).trim()
+
+  const userStart = userIndex + USER_PREFIX.length
+  const user = raw.slice(userStart).trim()
+
+  if (!system) {
+    return { system: null, user: user || raw }
+  }
+
+  return { system, user: user || '' }
+})
+
+const hasSystemPrompt = computed(() => !!parsedMessage.value.system)
+
 watchEffect(async () => {
-  contentHtml.value = props.message?.message ? md.render(props.message.message) : ''
+  const { system, user } = parsedMessage.value
+
+  systemContentHtml.value = system ? md.render(system) : ''
+  userContentHtml.value = user ? md.render(user) : ''
+
   await nextTick()
   bindCopyCodeToButtons()
 })
@@ -75,13 +130,20 @@ onMounted(() => {
 })
 </script>
 
+<style lang="scss">
+.chat-msg-content {
+  p, li, h1, h2, h3 {
+    line-height: 28px; /* можешь поиграться 1.5–1.7 */
+  }
+}
+</style>
+
 <style>
 .chat-msg-content {
   font-size: 0.875rem !important;
   font-weight: 400;
-  line-height: 1.25rem;
 }
-.chat-msg-content p,
+//.chat-msg-content p,
 .chat-msg-content table,
 .chat-msg-content ul,
 .chat-msg-content ol,

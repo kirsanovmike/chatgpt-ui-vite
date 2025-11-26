@@ -1,6 +1,10 @@
 <!-- src/components/NavigationDrawer.vue -->
 <template>
-  <v-navigation-drawer v-model="drawer" :permanent="mdAndUp" width="300">
+  <v-navigation-drawer
+      v-model="drawer" :permanent="mdAndUp" width="300"
+      color="sidebar-bg"
+      elevation="0"
+  >
     <!-- user header (можно скрыть если нет user) -->
     <template v-if="user" #prepend>
       <v-list>
@@ -49,7 +53,7 @@
 
     <template #append>
       <v-divider />
-      <v-expansion-panels>
+      <v-expansion-panels multiple v-model="open">
         <v-expansion-panel rounded="rounded-pill">
           <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-close">
             <v-icon icon="mdi-cog" class="mr-4" /> {{ $textVariables.settings }}
@@ -75,13 +79,13 @@
                 </v-list>
               </v-menu>
 
-              <!-- Feedback -->
-              <v-list-item
-                rounded="xl"
-                prepend-icon="mdi-help-circle-outline"
-                :title="$textVariables.feedback"
-                @click="openFeedback"
-              />
+<!--               Feedback-->
+<!--              <v-list-item-->
+<!--                rounded="xl"-->
+<!--                prepend-icon="mdi-help-circle-outline"-->
+<!--                :title="$textVariables.feedback"-->
+<!--                @click="openFeedback"-->
+<!--              />-->
             </v-list>
           </v-expansion-panel-text>
         </v-expansion-panel>
@@ -197,6 +201,8 @@ const loadingConversations = ref(false)
 onMounted(async () => {
   loadingConversations.value = false
 })
+
+const open = ref(0)
 
 // темы
 const theme = useThemeMode()
