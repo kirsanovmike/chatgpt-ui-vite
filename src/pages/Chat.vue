@@ -1,30 +1,42 @@
 <template>
   <v-app-bar class="ai-app-bar glass-app-bar" flat>
     <div class="d-flex align-center app-bar-left">
-      <v-app-bar-nav-icon class="glass-chip app-bar-nav" @click="toggleDrawer" />
-      <div class="app-title glass-chip px-4 py-2">
-        <v-toolbar-title class="text-subtitle-1 text-md-subtitle-1 font-weight-medium">
-          {{ navTitle }}
-        </v-toolbar-title>
+      <div class="app-title liquidGlass-wrapper badge-shell px-4 py-2">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <v-toolbar-title class="text-subtitle-1 text-md-subtitle-1 font-weight-medium">
+            {{ navTitle }}
+          </v-toolbar-title>
+        </div>
       </div>
     </div>
 
     <div class="d-flex align-center app-bar-right">
       <div id="portal-target" class="ml-3" />
 
-      <v-btn
-        title="Новый чат"
-        icon="add"
-        class="d-md-none ma-3 glass-chip"
-        @click="createNewConversation"
-      />
-      <v-btn
-        variant="text"
-        class="text-none d-none d-md-inline-flex glass-chip new-chat-btn"
-        @click="createNewConversation"
-      >
-        {{$textVariables.newConversation}}
-      </v-btn>
+      <div class="liquidGlass-wrapper hoverable badge-shell d-md-none ml-2" @click="createNewConversation">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <v-btn title="Новый чат" icon="add" variant="text" class="ma-1" />
+        </div>
+      </div>
+      <div class="liquidGlass-wrapper hoverable badge-shell d-none d-md-flex" @click="createNewConversation">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text px-3">
+          <v-btn
+            variant="text"
+            class="text-none new-chat-btn"
+          >
+            {{$textVariables.newConversation}}
+          </v-btn>
+        </div>
+      </div>
     </div>
   </v-app-bar>
 
@@ -41,7 +53,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Welcome from '@/components/Welcome.vue'
 import Conversation from '@/components/Conversation.vue'
-import { useDrawer } from '@/composables/states'
 import FloatingDisclaimer from '@/components/FloatingDisclaimer.vue'
 
 // ===== Типы =====
@@ -68,7 +79,6 @@ const getDefaultConversationData = (): ConversationT => ({
 })
 
 // ===== Состояние / роутер =====
-const drawer = useDrawer()
 const route = useRoute()
 const router = useRouter()
 const conversation = ref<ConversationT>(getDefaultConversationData())
@@ -87,8 +97,6 @@ const loadMessage = async () => {
 }
 
 // ===== UI-экшены =====
-const toggleDrawer = () => { drawer.value = !drawer.value }
-
 const createNewConversation = () => {
   if (route.path !== '/') {
     router.push({ path: '/', query: { new: '1' } })
@@ -156,13 +164,7 @@ const navTitle = computed(() => {
 
 .app-title {
   border-radius: 999px;
-  min-height: 44px;
-}
-
-.app-bar-nav {
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  min-height: 52px;
 }
 
 .app-bar-right {
@@ -172,6 +174,11 @@ const navTitle = computed(() => {
 .new-chat-btn {
   border-radius: 999px;
   padding-inline: 18px;
+}
+
+.badge-shell :deep(.v-btn) {
+  min-width: auto;
+  padding: 0 10px;
 }
 
 :global(.floating-disclaimer) {

@@ -8,19 +8,24 @@
       <div ref="chatWindow">
         <Teleport to="#portal-target">
           <!-- Селект выбора моделей -->
-          <div class="model-select-container mt-1 glass-chip">
-            <v-select
-                v-model="selectedModel"
-                :items="models"
-                item-title="name"
-                item-value="value"
-                label="Модель"
-                variant="outlined"
-                density="compact"
-                class="model-select"
-                hide-details
-                @update:model-value="onModelChange"
-            />
+          <div class="model-select-container mt-1 liquidGlass-wrapper hoverable">
+            <div class="liquidGlass-effect"></div>
+            <div class="liquidGlass-tint"></div>
+            <div class="liquidGlass-shine"></div>
+            <div class="liquidGlass-text model-select-text">
+              <v-select
+                  v-model="selectedModel"
+                  :items="models"
+                  item-title="name"
+                  item-value="value"
+                  label="Модель"
+                  variant="outlined"
+                  density="compact"
+                  class="model-select"
+                  hide-details
+                  @update:model-value="onModelChange"
+              />
+            </div>
           </div>
         </Teleport>
 
@@ -88,29 +93,36 @@
         <span class="mr-2 text-body-1">{{ systemPrompt.title }}</span>
         <v-btn icon="close" color="transparent" size="dense" elevation="0" @click="clearSystemPrompt" />
       </div>
-      <div class="chat-input-shell glass-card">
-        <v-btn
-            v-show="!fetchingResponse"
-            icon="view_list"
-            class="prompt-trigger glass-chip"
-            elevation="0"
-            @click="dialogAll = true"
-        />
-        <MsgEditor
-            ref="editor"
-            :send-message="send"
-            :disabled="fetchingResponse"
-            :loading="fetchingResponse"
-            class="flex-grow-1"
-        />
-        <v-btn
-            v-show="fetchingResponse"
-            icon="close"
-            title="Stop"
-            class="glass-chip"
-            elevation="0"
-            @click="stop"
-        />
+      <div class="chat-input-shell liquidGlass-wrapper hoverable">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text chat-input-content">
+          <v-btn
+              v-show="!fetchingResponse"
+              icon="view_list"
+              class="prompt-trigger"
+              elevation="0"
+              variant="text"
+              @click="dialogAll = true"
+          />
+          <MsgEditor
+              ref="editor"
+              :send-message="send"
+              :disabled="fetchingResponse"
+              :loading="fetchingResponse"
+              class="flex-grow-1 chat-msg-editor"
+          />
+          <v-btn
+              v-show="fetchingResponse"
+              icon="close"
+              title="Stop"
+              elevation="0"
+              variant="text"
+              class="send-btn"
+              @click="stop"
+          />
+        </div>
       </div>
     </div>
   </v-footer>
@@ -368,28 +380,40 @@ const onModelChange = (model: string) => {
 
 .chat-input-shell {
   display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 20px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
 }
 
-.chat-input-shell :deep(.v-field) {
+.chat-input-content {
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-input-shell :deep(.v-field),
+.chat-input-shell :deep(.v-field__field) {
   background: transparent;
   box-shadow: none;
 }
 
-.chat-input-shell :deep(.v-field__outline) {
-  --v-field-border-opacity: 0.24;
+.chat-input-shell :deep(textarea) {
+  min-height: 52px;
 }
 
 .chat-input-shell :deep(.v-btn) {
   box-shadow: none;
 }
 
-.prompt-trigger {
-  width: 44px;
-  height: 44px;
+.chat-msg-editor :deep(.v-field__input) {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.prompt-trigger,
+.send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
 }
 
 /* Анимация печати */
@@ -431,14 +455,22 @@ const onModelChange = (model: string) => {
 /* Селект модели */
 .model-select-container {
   z-index: 1000;
-  width: 260px;
-  border-radius: 18px;
-  padding: 8px 10px;
+  min-width: 240px;
+  border-radius: 22px;
+  padding: 6px 6px 6px 10px;
 }
 
 .model-select :deep(.v-field) {
   background: transparent;
   box-shadow: none;
+}
+
+.model-select-text {
+  padding-inline: 4px 10px;
+}
+
+.badge-shell {
+  min-height: 52px;
 }
 
 @media (max-width: 960px) {
