@@ -380,14 +380,16 @@ const onModelChange = (model: string) => {
 
 .chat-input-shell {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   padding: 8px 12px;
   border-radius: 999px;
 }
 
 .chat-input-content {
+  display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
 }
 
 .chat-input-shell :deep(.v-field),
@@ -398,6 +400,10 @@ const onModelChange = (model: string) => {
 
 .chat-input-shell :deep(textarea) {
   min-height: 52px;
+}
+
+.chat-input-shell :deep(.v-input__control) {
+  align-items: stretch;
 }
 
 .chat-input-shell :deep(.v-btn) {

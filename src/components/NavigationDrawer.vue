@@ -57,34 +57,20 @@
     <template #append>
       <div class="drawer-settings glass-card mx-2 mb-2">
         <v-expansion-panels multiple v-model="open">
-          <v-expansion-panel rounded="rounded-pill">
-            <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-close">
-              <v-icon icon="mdi-cog" class="mr-4" /> {{ $textVariables.settings }}
-            </v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <v-list density="compact">
-                <!-- Theme -->
-                <v-menu>
-                  <template #activator="{ props }">
-                    <v-list-item v-bind="props" rounded="xl" :title="$textVariables.theme">
-                      <template #prepend>
-                        <v-icon v-if="theme.mode === 'light'" icon="mdi-white-balance-sunny" />
-                        <v-icon v-else-if="theme.mode === 'dark'" icon="mdi-weather-night" />
-                        <v-icon v-else icon="mdi-theme-light-dark" />
-                      </template>
-                    </v-list-item>
-                  </template>
-
-                  <v-list>
-                    <v-list-item v-for="t in themeItems" :key="t.value" @click="theme.setMode(t.value)">
-                      <v-list-item-title>{{ t.title }}</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </v-list>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
+        <v-expansion-panel rounded="rounded-pill">
+          <v-expansion-panel-title expand-icon="mdi-plus" collapse-icon="mdi-close">
+            <v-icon icon="mdi-cog" class="mr-4" /> {{ $textVariables.settings }}
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <div class="d-flex flex-column gap-4">
+              <div>
+                <div class="text-subtitle-2 mb-2">{{ $textVariables.theme }}</div>
+                <ThemeSwitcher class="w-100" />
+              </div>
+            </div>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
       </div>
     </template>
   </v-navigation-drawer>
@@ -176,10 +162,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, getCurrentInstance } from 'vue'
+import { ref, computed, onMounted, getCurrentInstance, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useConversations, useDrawer, useUser } from '@/composables/states'
-import { useThemeMode } from '@/composables/theme'
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 
 // достаём appContext для $textVariables
 const { appContext } = getCurrentInstance()!
@@ -196,17 +182,14 @@ const conversations = useConversations()
 const loadingConversations = ref(false)
 onMounted(async () => {
   loadingConversations.value = false
+  if (mdAndUp.value) drawer.value = true
+})
+
+watch(mdAndUp, (val) => {
+  drawer.value = val
 })
 
 const open = ref(0)
-
-// темы
-const theme = useThemeMode()
-const themeItems = [
-  { title: textVariables.lightMode, value: 'light' as const },
-  { title: textVariables.darkMode, value: 'dark' as const },
-  { title: textVariables.followSystem, value: 'system' as const }
-]
 
 // sign out — потом подключишь бекенд
 const signOut = async () => {

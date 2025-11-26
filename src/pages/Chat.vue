@@ -1,6 +1,14 @@
 <template>
   <v-app-bar class="ai-app-bar glass-app-bar" flat>
     <div class="d-flex align-center app-bar-left">
+      <div class="liquidGlass-wrapper hoverable badge-shell menu-toggle" @click="drawer.value = !drawer.value">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text px-3">
+          <v-btn icon="mdi-menu" variant="text" class="ma-1" />
+        </div>
+      </div>
       <div class="app-title liquidGlass-wrapper badge-shell px-4 py-2">
         <div class="liquidGlass-effect"></div>
         <div class="liquidGlass-tint"></div>
@@ -54,6 +62,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Welcome from '@/components/Welcome.vue'
 import Conversation from '@/components/Conversation.vue'
 import FloatingDisclaimer from '@/components/FloatingDisclaimer.vue'
+import { useDrawer } from '@/composables/states'
 
 // ===== Типы =====
 type ChatMessage = {
@@ -82,6 +91,7 @@ const getDefaultConversationData = (): ConversationT => ({
 const route = useRoute()
 const router = useRouter()
 const conversation = ref<ConversationT>(getDefaultConversationData())
+const drawer = useDrawer()
 
 // ===== Заглушки вместо API (раскомментируешь позже) =====
 const loadConversation = async () => {
@@ -169,6 +179,7 @@ const navTitle = computed(() => {
 
 .app-bar-right {
   gap: 12px;
+  align-items: center;
 }
 
 .new-chat-btn {
@@ -181,9 +192,18 @@ const navTitle = computed(() => {
   padding: 0 10px;
 }
 
-:global(.floating-disclaimer) {
-  --disclaimer-offset: 104px;
-  --disclaimer-offset-mobile: 140px;
+.badge-shell {
+  min-height: 52px;
+}
+
+.menu-toggle {
+  padding-inline: 10px;
+}
+
+@media (min-width: 960px) {
+  .badge-shell {
+    min-width: 240px;
+  }
 }
 
 @media (max-width: 960px) {

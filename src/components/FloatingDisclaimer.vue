@@ -14,7 +14,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom) + var(--disclaimer-offset, 96px));
+  bottom: calc(env(safe-area-inset-bottom) + 8px);
   display: flex;
   justify-content: center;
   padding: 0 16px;
@@ -34,7 +34,7 @@
 
 @media (max-width: 960px) {
   .floating-disclaimer {
-    bottom: calc(env(safe-area-inset-bottom) + var(--disclaimer-offset-mobile, 118px));
+    bottom: calc(env(safe-area-inset-bottom) + 8px);
   }
 
   .floating-disclaimer__bubble {

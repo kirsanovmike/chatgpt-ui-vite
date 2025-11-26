@@ -1,7 +1,5 @@
 <!-- src/App.vue -->
 <template>
-  <!-- передаем текущую тему -->
-  <ThemeSwitcher />
   <svg id="glass-distortion-defs" aria-hidden="true">
     <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
       <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
@@ -26,13 +24,14 @@
     </filter>
   </svg>
   <v-app :theme="themeName">
+    <NavigationDrawer />
     <router-view />
   </v-app>
 </template>
 
 <script lang="ts" setup>
 import { useThemeMode } from '@/composables/theme'
-import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
+import NavigationDrawer from '@/components/NavigationDrawer.vue'
 
 const { themeName } = useThemeMode()
 </script>

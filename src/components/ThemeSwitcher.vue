@@ -1,5 +1,10 @@
 <template>
-  <fieldset ref="switcherRef" class="switcher" :c-previous="previous">
+  <fieldset
+    ref="switcherRef"
+    class="switcher"
+    :class="floating ? 'switcher--floating' : 'switcher--inline'"
+    :c-previous="previous"
+  >
     <legend class="switcher__legend">Выбор темы</legend>
 
     <label class="switcher__option">
@@ -79,10 +84,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useThemeMode } from '@/composables/theme'
 
 type ThemeName = 'light' | 'dark' | 'system'
+
+const props = defineProps<{ floating?: boolean }>()
+
+const floating = computed(() => props.floating === true)
 
 const { mode, setMode } = useThemeMode()
 const selected = ref<ThemeName>(mode.value || 'light')
