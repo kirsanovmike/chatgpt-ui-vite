@@ -3,16 +3,17 @@
     <v-textarea
         ref="textArea"
         v-model="message"
+        v-model:focused="isFocused"
         :auto-grow="autoGrow"
         :counter="MAX_PROMPT_CHARS"
         :disabled="disabled"
         :error="!!errorMessage"
         :error-messages="errorMessage"
         :hide-details="true"
-        :hint="hint"
         :label="currentLabel"
         :loading="loading"
         :maxlength="MAX_PROMPT_CHARS"
+        :placeholder="placeholderText"
         :rows="rows"
         :rules="[maxLengthRule]"
         class="userinputmsg"
@@ -20,20 +21,19 @@
         max-rows="8"
         variant="outlined"
         @keypress.enter.exact="enterOnly"
-    />
+    ></v-textarea>
 
     <v-btn
         v-if="!loading"
         :disabled="!maxLengthRule(message)"
-        class="ml-3"
+        class="ml-6"
         elevation="0"
         icon="send"
         title="Send"
         @click="clickSendBtn"
-    />
+    ></v-btn>
   </div>
 </template>
-
 
 <script setup>
 import {isMobile} from 'is-mobile'
@@ -61,9 +61,16 @@ const maxLengthRule = (value) => {
   return true
 }
 
-const hint = computed(() =>
+const hintText = computed(() =>
     isMobile() ? '' : 'Нажмите Enter для отправки. Shift+Enter для новой линии.'
 )
+
+const isFocused = ref(false)
+const placeholderText = computed(() => {
+  if (props.disabled) return ''
+  const hasText = (message.value?.length ?? 0) > 0
+  return isFocused.value && !hasText ? hintText.value : ''
+})
 
 watchEffect(() => {
   const lines = message.value.split(/\r\n|\r|\n/).length

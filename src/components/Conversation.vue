@@ -10,7 +10,7 @@
       <div ref="chatWindow">
         <!-- Телепорт для селекта модели в шапку -->
         <Teleport to="#portal-target">
-          <div class="model-select-container mt-1">
+          <div class="model-select-container" style="margin-top: 2px;">
             <v-select
                 v-model="selectedModel"
                 :items="models"
@@ -51,12 +51,14 @@
                   />
 
                   <!-- Контент сообщения -->
-                  <MsgContent
-                      :message="message"
-                      :index="index"
-                      :use-prompt="usePrompt"
-                      :delete-message="deleteMessage"
-                  />
+                  <div :class="['message-wrapper', { 'message-error': message.is_error }]">
+                    <MsgContent
+                        :message="message"
+                        :index="index"
+                        :use-prompt="usePrompt"
+                        :delete-message="deleteMessage"
+                    />
+                  </div>
 
                   <!-- Экшены для сообщений ассистента -->
                   <MessageActions
@@ -175,8 +177,6 @@
  *  - работу с системными и готовыми промптами
  */
 
-// ========================= Импорты =========================
-
 import { ref } from 'vue'
 
 import MessageActions from '@/components/MessageActions.vue'
@@ -193,6 +193,7 @@ import { trimMessagesByTokens } from '@/helpers/llm'
 type ChatMessage = {
   id?: number | string | null
   is_disabled?: boolean
+  is_error?: boolean
   content: string
   role: string
   message_type?: number
@@ -290,10 +291,6 @@ const readyPrompts = [
 
 // ========================= Пропсы и основное состояние =========================
 
-/**
- * Пропс с текущей беседой (сообщения, статус загрузки и т.д.).
- * Управляется родительским компонентом.
- */
 const props = defineProps<{ conversation: ConversationT }>()
 
 /** Флаг открытия диалога «Все промпты» */
@@ -414,8 +411,17 @@ const fetchReply = async () => {
       content: data.response.content,
       role: AuthorRole.Assistant
     })
+  } catch (error) {
+    console.error('Ошибка при запросе к LLM', error)
+
+    props.conversation.messages.push({
+      content: 'Упс, что-то пошло не так при обращении к модели. Попробуйте ещё раз чуть позже.',
+      role: AuthorRole.Assistant,
+      is_error: true
+    })
   } finally {
     fetchingResponse.value = false
+    scrollChatWindow()
   }
 }
 
@@ -451,7 +457,6 @@ const stop = () => abortFetch()
  * но здесь удобное место для будущей логики.
  */
 const onModelChange = (model: string) => {
-  // Здесь можно добавить аналитику, сохранение в настройки и т.д.
   console.log('Выбрана модель:', model)
 }
 </script>
@@ -489,6 +494,19 @@ const onModelChange = (model: string) => {
 
 .content_and_action.justify-end .message-actions {
   right: -30px;
+}
+
+/* Обёртка вокруг MsgContent */
+.message-wrapper {
+  max-width: 100%;
+}
+
+/* Красное системное сообщение об ошибке */
+.message-error {
+  border-left: 3px solid rgb(var(--v-theme-error));
+  background-color: rgba(var(--v-theme-error), 0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
 /* Плашка активного системного промпта */
