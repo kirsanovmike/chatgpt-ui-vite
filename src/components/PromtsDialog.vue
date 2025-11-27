@@ -3,22 +3,25 @@
   <v-dialog
       :model-value="modelValue"
       max-width="960"
-      @update:model-value="v => emit('update:modelValue', v)"
+      @update:model-value="value => emit('update:modelValue', value)"
   >
-    <v-card
-        class="d-flex flex-column"
-        style="min-height: 80vh; max-height: 80vh; overflow: hidden;"
-    >
-      <!-- Шапка -->
+    <v-card class="prompts-dialog-card d-flex flex-column">
+      <!-- Шапка диалога -->
       <v-toolbar class="px-4 flex-grow-0" density="comfortable" flat>
         <v-toolbar-title class="text-subtitle-1 font-weight-medium">
           Промпты
         </v-toolbar-title>
-        <v-spacer/>
-        <v-btn icon="close" variant="text" @click="close"/>
+
+        <v-spacer />
+
+        <v-btn
+            icon="close"
+            variant="text"
+            @click="close"
+        />
       </v-toolbar>
 
-      <!-- Шапка табов -->
+      <!-- Вкладки (отображаются только в списке, не в режиме детального просмотра готового промпта) -->
       <v-tabs
           v-if="!selectedPrompt"
           v-model="activeTab"
@@ -30,17 +33,18 @@
         <v-tab value="ready">Готовые промпты</v-tab>
       </v-tabs>
 
-      <!-- ЦЕНТРАЛЬНАЯ СКРОЛЛИРУЕМАЯ ОБЛАСТЬ -->
+      <!-- Центральная прокручиваемая область -->
       <div class="flex-grow-1 overflow-y-auto mt-0">
         <v-tabs-window v-model="activeTab">
+          <!-- Вкладка «Системные указания» -->
           <v-tabs-window-item value="system">
             <v-card-text class="pa-0">
               <div
-                  v-for="(p, i) in systemPrompts"
-                  :key="'dlg-' + i"
+                  v-for="(p, index) in systemPrompts"
+                  :key="'dlg-' + index"
               >
                 <div class="d-flex align-start px-4 py-3">
-                  <!-- Левая колонка -->
+                  <!-- Левая колонка: заголовок и раскрываемый текст -->
                   <div class="flex-grow-1">
                     <div class="text-body-1 font-weight-500">
                       {{ p.title }}
@@ -52,34 +56,33 @@
                         @leave="onLeave"
                         @after-enter="onAfterEnter"
                     >
-                      <div v-show="expandedIdx === i" class="mt-3">
+                      <div
+                          v-show="expandedIdx === index"
+                          class="mt-3"
+                      >
                         <div
-                            class="pa-3 rounded-lg border-sm"
-                            style="background: rgba(var(--v-theme-surface-variant), 0.5);
-                                 border-color: rgba(var(--v-theme-on-surface), 0.12);"
+                            class="pa-3 rounded-lg border-sm system-prompt-full"
                         >
-                          <pre
-                              class="ma-0 text-body-2"
-                              style="white-space: pre-wrap;
-                                   word-break: break-word;
-                                   line-height: 1.2;"
-                          >{{ p.full }}</pre>
+                          <pre class="ma-0 text-body-2 system-prompt-pre">
+{{ p.full }}
+                          </pre>
                         </div>
                       </div>
                     </transition>
                   </div>
 
-                  <!-- Правая колонка -->
+                  <!-- Правая колонка: кнопки «Подробнее» и «Использовать» -->
                   <div class="d-flex align-center justify-end ml-4">
                     <v-btn
                         class="text-none text-body-2 text-medium-emphasis"
                         density="compact"
                         size="small"
                         variant="text"
-                        @click="toggle(i)"
+                        @click="toggle(index)"
                     >
-                      {{ expandedIdx === i ? 'Свернуть' : 'Подробнее' }}
+                      {{ expandedIdx === index ? 'Свернуть' : 'Подробнее' }}
                     </v-btn>
+
                     <v-btn
                         class="text-none ml-2"
                         color="primary"
@@ -92,14 +95,19 @@
                   </div>
                 </div>
 
-                <v-divider/>
+                <v-divider />
               </div>
             </v-card-text>
           </v-tabs-window-item>
 
+          <!-- Вкладка «Готовые промпты» -->
           <v-tabs-window-item value="ready">
             <v-card-text class="pa-0">
-              <div v-if="selectedPrompt" class="px-4 my-4 ready-detail">
+              <!-- Детальный просмотр конкретного готового промпта -->
+              <div
+                  v-if="selectedPrompt"
+                  class="px-4 my-4 ready-detail"
+              >
                 <v-btn
                     class="mb-3"
                     prepend-icon="mdi-arrow-left"
@@ -126,7 +134,9 @@
                   {{ selectedPrompt.title }}
                 </div>
 
-                <pre class="ready-text">{{ selectedPrompt.text }}</pre>
+                <pre class="ready-text">
+{{ selectedPrompt.text }}
+                </pre>
 
                 <div class="text-body-2 text-medium-emphasis mt-4">
                   В чате с ТНЭ чатом замените данные в квадратных скобках […] на свои.
@@ -142,6 +152,7 @@
                 </v-btn>
               </div>
 
+              <!-- Список карточек готовых промптов -->
               <div v-else class="pa-4">
                 <v-row class="ready-cards" dense>
                   <v-col
@@ -158,6 +169,7 @@
                       <div class="text-subtitle-1 font-weight-semibold mb-4">
                         {{ prompt.title }}
                       </div>
+
                       <div class="d-flex flex-wrap gap-2">
                         <v-chip
                             v-for="tag in prompt.tags"
@@ -179,10 +191,14 @@
         </v-tabs-window>
       </div>
 
-      <!-- Футер -->
+      <!-- Футер диалога -->
       <v-card-actions class="px-4 flex-grow-0">
-        <v-spacer/>
-        <v-btn class="text-none" variant="text" @click="close">
+        <v-spacer />
+        <v-btn
+            class="text-none"
+            variant="text"
+            @click="close"
+        >
           Закрыть
         </v-btn>
       </v-card-actions>
@@ -191,46 +207,148 @@
 </template>
 
 <script lang="ts" setup>
-import {nextTick, ref, watch} from 'vue'
+/**
+ * WelcomePromptsDialog
+ *
+ * Диалог, в котором пользователь:
+ *  - выбирает системные указания (systemPrompts) и применяет их к чату;
+ *  - просматривает и копирует «готовые промпты» (readyPrompts).
+ *
+ * Внешний контракт:
+ *  - v-model: Boolean (modelValue)
+ *  - props: systemPrompts, readyPrompts
+ *  - emits:
+ *      - update:modelValue (открыть/закрыть диалог)
+ *      - use (выбор системного промпта)
+ *      - apply-ready (подстановка готового промпта в редактор)
+ */
 
-type SystemPrompt = { title: string; full: string }
-type ReadyPrompt = { id: string; title: string; tags: string[]; text: string }
+import { nextTick, ref, watch } from 'vue'
+
+// ===================== Типы =====================
+
+type SystemPrompt = {
+  title: string
+  full: string
+}
+
+type ReadyPrompt = {
+  id: string
+  title: string
+  tags: string[]
+  text: string
+}
+
+// ===================== Пропсы и события =====================
 
 const props = defineProps<{
-  modelValue: boolean,
-  systemPrompts: SystemPrompt[],
-  readyPrompts: ReadyPrompt[],
+  modelValue: boolean
+  systemPrompts: SystemPrompt[]
+  readyPrompts: ReadyPrompt[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'use', content: SystemPrompt): void
-  (e: 'apply-ready', content: string): void
+  (event: 'update:modelValue', value: boolean): void
+  (event: 'use', content: SystemPrompt): void
+  (event: 'apply-ready', content: string): void
 }>()
 
+// ===================== Состояние диалога =====================
+
+/**
+ * index раскрытого системного промпта (для «Подробнее»).
+ * null — ничего не раскрыто.
+ */
 const expandedIdx = ref<number | null>(null)
+
+/**
+ * Активная вкладка:
+ *  - 'system' — системные указания
+ *  - 'ready' — готовые промпты
+ */
 const activeTab = ref<'system' | 'ready'>('system')
+
+/**
+ * Текущий выбранный готовый промпт.
+ * Если null — показывается список карточек.
+ */
 const selectedPrompt = ref<ReadyPrompt | null>(null)
 
+// ===================== Базовые действия =====================
+
+/**
+ * Закрыть диалог и сбросить локальное состояние.
+ */
 const close = () => {
   emit('update:modelValue', false)
   selectedPrompt.value = null
 }
 
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    activeTab.value = 'system'
-    expandedIdx.value = null
-    selectedPrompt.value = null
-  }
-})
+/**
+ * При открытии диалога сбрасываем вкладку и раскрытия,
+ * чтобы пользователь каждый раз видел «чистое» состояние.
+ */
+watch(
+    () => props.modelValue,
+    isOpen => {
+      if (isOpen) {
+        activeTab.value = 'system'
+        expandedIdx.value = null
+        selectedPrompt.value = null
+      }
+    }
+)
 
-const toggle = async (idx: number) => {
-  expandedIdx.value = expandedIdx.value === idx ? null : idx
+// ===================== Системные промпты =====================
+
+/**
+ * Тоггл блока «Подробнее» для системных указаний.
+ */
+const toggle = async (index: number) => {
+  expandedIdx.value = expandedIdx.value === index ? null : index
   await nextTick()
 }
 
-// Плавные раскрытия (как раньше)
+/**
+ * Нажатие на «Использовать» у системного промпта:
+ *  - эмитим выбранный промпт родителю,
+ *  - закрываем диалог.
+ */
+const handleUseClick = (prompt: SystemPrompt) => {
+  emit('use', prompt)
+  emit('update:modelValue', false)
+}
+
+// ===================== Готовые промпты =====================
+
+/**
+ * Открыть детальный просмотр готового промпта.
+ */
+const openReadyPrompt = (prompt: ReadyPrompt) => {
+  selectedPrompt.value = prompt
+}
+
+/**
+ * Скопировать готовый промпт в буфер обмена и отдать его родителю.
+ * Родитель обычно подставляет этот текст в редактор.
+ */
+const copyPrompt = async (prompt: ReadyPrompt) => {
+  try {
+    await navigator.clipboard?.writeText(prompt.text)
+  } catch (error) {
+    console.warn('Clipboard is not доступен', error)
+  }
+
+  emit('apply-ready', prompt.text)
+  emit('update:modelValue', false)
+}
+
+// ===================== Анимация раскрытия блока =====================
+
+/**
+ * onEnter / onAfterEnter / onLeave — управляют плавной анимацией
+ * раскрытия/сворачивания блока с текстом системного промпта.
+ */
 const onEnter = (el: Element) => {
   const node = el as HTMLElement
   node.style.height = '0px'
@@ -243,49 +361,58 @@ const onEnter = (el: Element) => {
     node.style.opacity = '1'
   })
 }
+
 const onAfterEnter = (el: Element) => {
   const node = el as HTMLElement
   node.style.height = 'auto'
   node.style.overflow = ''
   node.style.transition = ''
 }
+
 const onLeave = (el: Element) => {
   const node = el as HTMLElement
   node.style.height = node.scrollHeight + 'px'
   node.style.opacity = '1'
   node.style.overflow = 'hidden'
   node.style.transition = 'height 240ms ease, opacity 240ms ease'
+
   requestAnimationFrame(() => {
     node.style.height = '0px'
     node.style.opacity = '0'
   })
 }
-
-const handleUseClick = (p: SystemPrompt) => {
-  emit('use', p)
-  emit('update:modelValue', false)
-}
-
-const openReadyPrompt = (prompt: ReadyPrompt) => {
-  selectedPrompt.value = prompt
-}
-
-const copyPrompt = async (prompt: ReadyPrompt) => {
-  try {
-    await navigator.clipboard?.writeText(prompt.text)
-  } catch (e) {
-    console.warn('Clipboard is not available', e)
-  }
-  emit('apply-ready', prompt.text)
-  emit('update:modelValue', false)
-}
 </script>
 
 <style scoped>
+/* ===== Карточка диалога ===== */
+
+.prompts-dialog-card {
+  min-height: 80vh;
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+/* ===== Анимация плавного раскрытия ===== */
+
 .smooth-fold-enter-active,
 .smooth-fold-leave-active {
   transition: height 240ms ease, opacity 240ms ease;
 }
+
+/* ===== Системные промпты (полный текст) ===== */
+
+.system-prompt-full {
+  background: rgba(var(--v-theme-surface-variant), 0.5);
+  border-color: rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.system-prompt-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+/* ===== Карточки готовых промптов ===== */
 
 .ready-card {
   cursor: pointer;
@@ -309,9 +436,9 @@ const copyPrompt = async (prompt: ReadyPrompt) => {
 .ready-detail {
   margin: 0 auto;
 }
-</style>
 
-<style scoped>
+/* ===== Общие типографические стили ===== */
+
 .v-card-title,
 .v-card-text,
 .v-btn {
