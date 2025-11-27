@@ -113,7 +113,7 @@ const createNewConversation = () => {
     router.push({path: '/', query: {new: '1'}})
     return
   }
-  conversation.value = {...getDefaultConversationData(), topic: 'Новый чат'}
+  conversation.value = {...getDefaultConversationData(), topic: 'ТНЭ чат'}
 }
 
 // ===== Жизненный цикл / реактивность =====
