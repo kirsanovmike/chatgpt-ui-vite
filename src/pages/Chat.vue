@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="d-flex align-center">
-      <div class="liquidGlass-wrapper liquidGlass-wrapper--lg">
+      <div class="liquidGlass-wrapper liquidGlass-wrapper--lg" style="min-height: 61px;">
         <div class="liquidGlass-effect"></div>
         <div class="liquidGlass-tint"></div>
         <div class="liquidGlass-shine"></div>
@@ -22,7 +22,7 @@
         </div>
       </div>
       <div
-          class="liquidGlass-wrapper liquidGlass-wrapper--lg liquidGlass-wrapper--new-chat"
+          class="liquidGlass-wrapper liquidGlass-wrapper--lg liquidGlass-wrapper--new-chat ml-4"
           @click="createNewConversation"
       >
         <div class="liquidGlass-effect"></div>
