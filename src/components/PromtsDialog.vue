@@ -29,8 +29,8 @@
           density="comfortable"
           class="mt-2"
       >
-        <v-tab value="system">Системные указания</v-tab>
         <v-tab value="ready">Готовые промпты</v-tab>
+        <v-tab value="system">Системные указания</v-tab>
       </v-tabs>
 
       <!-- Центральная прокручиваемая область -->
@@ -266,7 +266,7 @@ const expandedIdx = ref<number | null>(null)
  *  - 'system' — системные указания
  *  - 'ready' — готовые промпты
  */
-const activeTab = ref<'system' | 'ready'>('system')
+const activeTab = ref<'system' | 'ready'>('ready')
 
 /**
  * Текущий выбранный готовый промпт.
@@ -292,7 +292,7 @@ watch(
     () => props.modelValue,
     isOpen => {
       if (isOpen) {
-        activeTab.value = 'system'
+        activeTab.value = 'ready'
         expandedIdx.value = null
         selectedPrompt.value = null
       }
