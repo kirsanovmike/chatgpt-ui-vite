@@ -96,7 +96,7 @@
 
 /* светлая тема: стекло есть, тени нет */
 .v-theme--light .liquidGlass-effect {
-    opacity: 0.6;
+    opacity: 0.8;
 }
 .v-theme--light .liquidGlass-tint {
     background: rgba(255, 255, 255, 0.8);
