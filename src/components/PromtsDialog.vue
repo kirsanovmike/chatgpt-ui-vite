@@ -7,7 +7,7 @@
   >
     <v-card
       class="d-flex flex-column"
-      style="min-height: 80vh; max-height: 80vh;"
+      style="min-height: 80vh; max-height: 80vh; overflow: hidden;"
     >
       <!-- Шапка -->
       <v-toolbar class="px-4 flex-grow-0" density="comfortable" flat>
@@ -18,145 +18,166 @@
         <v-btn icon="close" variant="text" @click="close"/>
       </v-toolbar>
 
-      <v-tabs v-model="activeTab" density="comfortable" grow>
+      <!-- Шапка табов -->
+      <v-tabs
+        v-if="!selectedPrompt"
+        v-model="activeTab"
+        color="primary"
+        density="comfortable"
+        class="mt-2"
+      >
         <v-tab value="system">Системные указания</v-tab>
         <v-tab value="ready">Готовые промпты</v-tab>
       </v-tabs>
 
-      <!-- Контент со скроллом -->
-      <v-window v-model="activeTab" class="flex-grow-1 d-flex flex-column">
-        <v-window-item value="system" class="flex-grow-1 d-flex flex-column">
-          <v-card-text
-            class="pa-0 flex-grow-1"
-            style="overflow-y: auto;"
-          >
-            <div
-              v-for="(p, i) in systemPrompts"
-              :key="'dlg-' + i"
-            >
-              <div class="d-flex align-start px-4 py-3">
-                <!-- Левая колонка -->
-                <div class="flex-grow-1">
-                  <div class="text-body-1 font-weight-500">
-                    {{ p.title }}
+      <!-- ЦЕНТРАЛЬНАЯ СКРОЛЛИРУЕМАЯ ОБЛАСТЬ -->
+      <div class="flex-grow-1 overflow-y-auto mt-0">
+        <v-tabs-window v-model="activeTab">
+          <v-tabs-window-item value="system">
+            <v-card-text class="pa-0">
+              <div
+                v-for="(p, i) in systemPrompts"
+                :key="'dlg-' + i"
+              >
+                <div class="d-flex align-start px-4 py-3">
+                  <!-- Левая колонка -->
+                  <div class="flex-grow-1">
+                    <div class="text-body-1 font-weight-500">
+                      {{ p.title }}
+                    </div>
+
+                    <transition
+                      name="smooth-fold"
+                      @enter="onEnter"
+                      @leave="onLeave"
+                      @after-enter="onAfterEnter"
+                    >
+                      <div v-show="expandedIdx === i" class="mt-3">
+                        <div
+                          class="pa-3 rounded-lg border-sm"
+                          style="background: rgba(var(--v-theme-surface-variant), 0.5);
+                                 border-color: rgba(var(--v-theme-on-surface), 0.12);"
+                        >
+                          <pre
+                            class="ma-0 text-body-2"
+                            style="white-space: pre-wrap;
+                                   word-break: break-word;
+                                   line-height: 1.2;"
+                          >{{ p.full }}</pre>
+                        </div>
+                      </div>
+                    </transition>
                   </div>
 
-                  <transition
-                    name="smooth-fold"
-                    @enter="onEnter"
-                    @leave="onLeave"
-                    @after-enter="onAfterEnter"
-                  >
-                    <div v-show="expandedIdx === i" class="mt-3">
-                      <div
-                        class="pa-3 rounded-lg border-sm"
-                        style="background: rgba(var(--v-theme-surface-variant), 0.5);
-                               border-color: rgba(var(--v-theme-on-surface), 0.12);"
-                      >
-                        <pre
-                          class="ma-0 text-body-2"
-                          style="white-space: pre-wrap;
-         word-break: break-word;
-         line-height: 1.2;"
-                        >{{ p.full }}</pre>
-                      </div>
-                    </div>
-                  </transition>
+                  <!-- Правая колонка -->
+                  <div class="d-flex align-center justify-end ml-4">
+                    <v-btn
+                      class="text-none text-body-2 text-medium-emphasis"
+                      density="compact"
+                      size="small"
+                      variant="text"
+                      @click="toggle(i)"
+                    >
+                      {{ expandedIdx === i ? 'Свернуть' : 'Подробнее' }}
+                    </v-btn>
+                    <v-btn
+                      class="text-none ml-2"
+                      color="primary"
+                      density="comfortable"
+                      elevation="0"
+                      @click="handleUseClick(p)"
+                    >
+                      Использовать
+                    </v-btn>
+                  </div>
                 </div>
 
-                <!-- Правая колонка -->
-                <div class="d-flex align-center justify-end ml-4">
-                  <v-btn
-                    class="text-none text-body-2 text-medium-emphasis"
-                    density="compact"
-                    size="small"
-                    variant="text"
-                    @click="toggle(i)"
-                  >
-                    {{ expandedIdx === i ? 'Свернуть' : 'Подробнее' }}
-                  </v-btn>
-                  <v-btn
-                    class="text-none ml-2"
+                <v-divider/>
+              </div>
+            </v-card-text>
+          </v-tabs-window-item>
+
+          <v-tabs-window-item value="ready">
+            <v-card-text class="pa-0">
+              <div v-if="selectedPrompt" class="px-4 my-4 ready-detail">
+                <v-btn
+                  class="mb-3"
+                  prepend-icon="mdi-arrow-left"
+                  variant="text"
+                  @click="selectedPrompt = null"
+                >
+                  Назад
+                </v-btn>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <v-chip
+                    v-for="tag in selectedPrompt.tags"
+                    :key="tag"
                     color="primary"
-                    density="comfortable"
-                    elevation="0"
-                    @click="handleUseClick(p)"
+                    size="small"
+                    variant="outlined"
+                    class="mr-2"
                   >
-                    Использовать
-                  </v-btn>
+                    {{ tag }}
+                  </v-chip>
                 </div>
-              </div>
 
-              <v-divider/>
-            </div>
-          </v-card-text>
-        </v-window-item>
+                <div class="text-h6 font-weight-semibold mb-3">
+                  {{ selectedPrompt.title }}
+                </div>
 
-        <v-window-item value="ready" class="flex-grow-1 d-flex flex-column">
-          <v-card-text class="pa-0 flex-grow-1" style="overflow-y: auto;">
-            <div v-if="selectedPrompt" class="pa-4 ready-detail">
-              <v-btn variant="text" prepend-icon="mdi-arrow-left" class="mb-3" @click="selectedPrompt = null">
-                Назад
-              </v-btn>
+                <pre class="ready-text">{{ selectedPrompt.text }}</pre>
 
-              <div class="d-flex flex-wrap gap-2 mb-3">
-                <v-chip
-                  v-for="tag in selectedPrompt.tags"
-                  :key="tag"
-                  size="small"
+                <div class="text-body-2 text-medium-emphasis mt-4">
+                  В чате с ТНЭ чатом замените данные в квадратных скобках […] на свои.
+                </div>
+
+                <v-btn
+                  class="text-none mt-4"
                   color="primary"
-                  variant="outlined"
+                  prepend-icon="mdi-content-copy"
+                  @click="copyPrompt(selectedPrompt)"
                 >
-                  {{ tag }}
-                </v-chip>
+                  Подставить промпт
+                </v-btn>
               </div>
 
-              <div class="text-h6 font-weight-semibold mb-3">{{ selectedPrompt.title }}</div>
-
-              <pre class="ready-text">{{ selectedPrompt.text }}</pre>
-
-              <div class="text-body-2 text-medium-emphasis mt-4">
-                В чате с ТНЭ чатом замените данные в квадратных скобках […] на свои.
+              <div v-else class="pa-4">
+                <v-row class="ready-cards" dense>
+                  <v-col
+                    v-for="prompt in readyPrompts"
+                    :key="prompt.id"
+                    cols="12"
+                    sm="6"
+                  >
+                    <v-card
+                      class="ready-card pa-4 h-100 elevation-1"
+                      style="background-color: rgb(var(--v-theme-header-bg));"
+                      @click="openReadyPrompt(prompt)"
+                    >
+                      <div class="text-subtitle-1 font-weight-semibold mb-4">
+                        {{ prompt.title }}
+                      </div>
+                      <div class="d-flex flex-wrap gap-2">
+                        <v-chip
+                          v-for="tag in prompt.tags"
+                          :key="tag"
+                          color="primary"
+                          size="small"
+                          variant="outlined"
+                          class="mr-2"
+                        >
+                          {{ tag }}
+                        </v-chip>
+                      </div>
+                    </v-card>
+                  </v-col>
+                </v-row>
               </div>
-
-              <v-btn
-                class="text-none mt-4"
-                color="primary"
-                prepend-icon="mdi-content-copy"
-                @click="copyPrompt(selectedPrompt)"
-              >
-                Скопировать промпт
-              </v-btn>
-            </div>
-
-            <div v-else class="pa-4">
-              <v-row dense class="ready-cards">
-                <v-col
-                  v-for="prompt in readyPrompts"
-                  :key="prompt.id"
-                  cols="12"
-                  sm="6"
-                >
-                  <v-card class="ready-card glass-card pa-4 h-100" @click="openReadyPrompt(prompt)">
-                    <div class="text-subtitle-1 font-weight-semibold mb-4">{{ prompt.title }}</div>
-                    <div class="d-flex flex-wrap gap-2">
-                      <v-chip
-                        v-for="tag in prompt.tags"
-                        :key="tag"
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      >
-                        {{ tag }}
-                      </v-chip>
-                    </div>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </div>
-          </v-card-text>
-        </v-window-item>
-      </v-window>
+            </v-card-text>
+          </v-tabs-window-item>
+        </v-tabs-window>
+      </div>
 
       <!-- Футер -->
       <v-card-actions class="px-4 flex-grow-0">
@@ -286,7 +307,6 @@ const copyPrompt = async (prompt: ReadyPrompt) => {
 }
 
 .ready-detail {
-  max-width: 760px;
   margin: 0 auto;
 }
 </style>

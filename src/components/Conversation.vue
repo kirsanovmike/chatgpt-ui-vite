@@ -88,29 +88,34 @@
         <span class="mr-2 text-body-1">{{ systemPrompt.title }}</span>
         <v-btn icon="close" color="transparent" size="dense" elevation="0" @click="clearSystemPrompt" />
       </div>
-      <div class="chat-input-shell glass-card">
-        <v-btn
+      <div class="chat-input-shell liquidGlass-wrapper glass-card">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+
+        <div class="liquidGlass-text chat-input-shell__content d-flex align-center">
+          <v-btn
             v-show="!fetchingResponse"
             icon="view_list"
-            class="prompt-trigger glass-chip"
+            class="prompt-trigger glass-chip mr-4"
             elevation="0"
             @click="dialogAll = true"
-        />
-        <MsgEditor
+          />
+          <MsgEditor
             ref="editor"
             :send-message="send"
             :disabled="fetchingResponse"
             :loading="fetchingResponse"
-            class="flex-grow-1"
-        />
-        <v-btn
+          />
+          <v-btn
             v-show="fetchingResponse"
             icon="close"
             title="Stop"
-            class="glass-chip"
+            class="glass-chip ml-6"
             elevation="0"
             @click="stop"
-        />
+          />
+        </div>
       </div>
     </div>
   </v-footer>
@@ -453,5 +458,51 @@ const onModelChange = (model: string) => {
   .prompt-trigger {
     order: 3;
   }
+}
+
+.chat-input-shell {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 20px;
+  /* gap и т.п. уберём внутрь контента */
+}
+
+/* Отключаем старый фон glass-card только для этого блока */
+.chat-input-shell.glass-card {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* Внутренний контент поверх стекла */
+.chat-input-shell__content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 14px;
+  width: 100%;
+  border-radius: 20px;
+}
+
+/* Адаптация старых правил под новый внутренний контейнер */
+.chat-input-shell__content :deep(.v-field) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.chat-input-shell__content :deep(.v-field__outline) {
+  --v-field-border-opacity: 0.24;
+}
+
+.chat-input-shell__content :deep(.v-btn) {
+  box-shadow: none;
+}
+
+.prompt-trigger {
+  width: 44px;
+  height: 44px;
 }
 </style>

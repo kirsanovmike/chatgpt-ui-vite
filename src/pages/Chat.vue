@@ -1,39 +1,76 @@
 <template>
-  <v-app-bar class="ai-app-bar glass-app-bar" flat>
+  <v-app-bar class="ai-app-bar" flat>
     <div class="d-flex align-center app-bar-left">
-      <v-app-bar-nav-icon class="glass-chip app-bar-nav" @click="toggleDrawer" />
-      <div class="app-title glass-chip px-4 py-2">
-        <v-toolbar-title class="text-subtitle-1 text-md-subtitle-1 font-weight-medium">
-          {{ navTitle }}
-        </v-toolbar-title>
+      <!-- Бургер -->
+      <div class="liquidGlass-wrapper liquidGlass-chip app-bar-nav-shell">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text app-bar-nav-inner">
+          <v-app-bar-nav-icon class="app-bar-nav" @click="toggleDrawer" />
+        </div>
+      </div>
+
+      <!-- Заголовок -->
+      <div class="liquidGlass-wrapper liquidGlass-chip app-title">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text app-title__inner">
+          <v-toolbar-title class="text-subtitle-1 text-md-subtitle-1 font-weight-medium">
+            {{ navTitle }}
+          </v-toolbar-title>
+        </div>
       </div>
     </div>
 
     <div class="d-flex align-center app-bar-right">
-      <div id="portal-target" class="ml-3" />
+      <!-- Портал под селект моделей -->
+      <div class="liquidGlass-wrapper liquidGlass-chip portal-shell ml-3">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text portal-shell__content" id="portal-target"></div>
+      </div>
 
-      <v-btn
-        title="Новый чат"
-        icon="add"
-        class="d-md-none ma-3 glass-chip"
-        @click="createNewConversation"
-      />
-      <v-btn
-        variant="text"
-        class="text-none d-none d-md-inline-flex glass-chip new-chat-btn"
-        @click="createNewConversation"
-      >
-        {{$textVariables.newConversation}}
-      </v-btn>
+      <!-- Кнопка "Новый чат" (иконка, мобилка) -->
+      <div class="liquidGlass-wrapper liquidGlass-chip d-md-none ma-3 new-chat-icon-shell">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <v-btn
+              title="Новый чат"
+              icon="add"
+              class="new-chat-icon-btn"
+              @click="createNewConversation"
+          />
+        </div>
+      </div>
+
+      <!-- Кнопка "Новый чат" (текст, десктоп) -->
+      <div class="liquidGlass-wrapper liquidGlass-chip d-none d-md-inline-flex new-chat-btn-shell">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <v-btn
+              variant="text"
+              class="text-none new-chat-btn"
+              @click="createNewConversation"
+          >
+            {{$textVariables.newConversation}}
+          </v-btn>
+        </div>
+      </div>
     </div>
   </v-app-bar>
 
   <v-main>
     <Welcome v-if="!route.params.id && (conversation.messages?.length ?? 0) === 0" />
     <Conversation :conversation="conversation" />
+    <FloatingDisclaimer />
   </v-main>
-
-  <FloatingDisclaimer />
 </template>
 
 <script setup lang="ts">
@@ -186,6 +223,123 @@ const navTitle = computed(() => {
 
   .app-title {
     padding-inline: 14px;
+  }
+}
+
+.ai-app-bar {
+  background: transparent !important;
+  box-shadow: none;
+  padding: 12px 16px;
+}
+
+.ai-app-bar :deep(.v-toolbar__content) {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Общий чип для шапки — одна высота для всех */
+.liquidGlass-chip {
+  min-height: 44px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+}
+
+/* Навигация */
+.app-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-bar-nav-shell {
+  width: 44px;
+  flex: 0 0 auto;
+}
+
+.app-bar-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-bar-nav {
+  width: 32px;
+  height: 32px;
+}
+
+/* Заголовок */
+.app-title {
+  flex: 0 0 auto;
+}
+
+.app-title__inner {
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* Правый блок */
+.app-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Портал под селект моделей */
+.portal-shell {
+  min-width: 240px;
+}
+
+.portal-shell__content {
+  display: flex;
+  align-items: center;
+}
+
+/* Кнопки "Новый чат" */
+.new-chat-icon-shell,
+.new-chat-btn-shell {
+  flex: 0 0 auto;
+}
+
+.new-chat-icon-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+}
+
+.new-chat-btn {
+  border-radius: 999px;
+  padding-inline: 18px;
+  min-height: 32px;
+}
+
+/* Чтоб старый стеклянный фон не конфликтовал внутри liquidGlass */
+.liquidGlass-wrapper :deep(.glass-card),
+.liquidGlass-wrapper :deep(.glass-chip) {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* Дисклеймер как был */
+:global(.floating-disclaimer) {
+  --disclaimer-offset: 104px;
+  --disclaimer-offset-mobile: 140px;
+}
+
+@media (max-width: 960px) {
+  .ai-app-bar {
+    padding-inline: 8px;
+  }
+
+  .app-title__inner {
+    padding-inline: 14px;
+  }
+
+  .portal-shell {
+    display: none; /* если селект в портале не нужен на мобилке — опционально */
   }
 }
 </style>

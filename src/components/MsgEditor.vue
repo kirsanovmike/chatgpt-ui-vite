@@ -1,49 +1,49 @@
 <template>
   <div class="flex-grow-1 d-flex align-center justify-space-between">
     <v-textarea
-        ref="textArea"
-        v-model="message"
-        :label="currentLabel"
-        :placeholder="placeholderText"
-        :rows="rows"
-        max-rows="8"
-        :auto-grow="autoGrow"
-        :disabled="disabled"
-        :loading="loading"
-        :hide-details="hintText ? 'auto' : true"
-        clearable
-        variant="outlined"
-        class="userinputmsg"
-        v-model:focused="isFocused"
-        @keypress.enter.exact="enterOnly"
-        :error-messages="errorMessage"
-        :error="!!errorMessage"
-        :rules="[maxLengthRule]"
-        :counter="MAX_PROMPT_CHARS"
-        :maxlength="MAX_PROMPT_CHARS"
+      ref="textArea"
+      v-model="message"
+      v-model:focused="isFocused"
+      :auto-grow="autoGrow"
+      :counter="MAX_PROMPT_CHARS"
+      :disabled="disabled"
+      :error="!!errorMessage"
+      :error-messages="errorMessage"
+      :hide-details="true"
+      :label="currentLabel"
+      :loading="loading"
+      :maxlength="MAX_PROMPT_CHARS"
+      :placeholder="placeholderText"
+      :rows="rows"
+      :rules="[maxLengthRule]"
+      class="userinputmsg"
+      clearable
+      max-rows="8"
+      variant="outlined"
+      @keypress.enter.exact="enterOnly"
     ></v-textarea>
 
     <v-btn
-        v-if="!loading"
-        icon="send"
-        title="Send"
-        class="ml-3"
-        elevation="0"
-        :disabled="!maxLengthRule(message)"
-        @click="clickSendBtn"
+      v-if="!loading"
+      :disabled="!maxLengthRule(message)"
+      class="ml-6"
+      elevation="0"
+      icon="send"
+      title="Send"
+      @click="clickSendBtn"
     ></v-btn>
   </div>
 </template>
 
 <script setup>
-import { isMobile } from 'is-mobile'
+import {isMobile} from 'is-mobile'
 import {computed, ref, watchEffect} from "vue";
 import {AuthorRole} from "@/data/enums/AuthorRole.js";
 
 const props = defineProps({
-  sendMessage: { type: Function, required: true },
-  disabled: { type: Boolean, default: false },
-  loading: { type: Boolean, default: false }
+  sendMessage: {type: Function, required: true},
+  disabled: {type: Boolean, default: false},
+  loading: {type: Boolean, default: false}
 })
 
 const message = ref('')
@@ -62,7 +62,7 @@ const maxLengthRule = (value) => {
 }
 
 const hintText = computed(() =>
-    isMobile() ? '' : 'Нажмите Enter для отправки. Shift+Enter для новой линии.'
+  isMobile() ? '' : 'Нажмите Enter для отправки. Shift+Enter для новой линии.'
 )
 
 const isFocused = ref(false)
@@ -89,7 +89,7 @@ const send = () => {
 
   if (msg.length > 0) {
     const item = toolSelector.value.list[toolSelector.value.selected]
-    props.sendMessage({ content: msg, tool: item.name, role: item.role })
+    props.sendMessage({content: msg, tool: item.name, role: item.role})
   }
   message.value = ''
   toolSelector.value.selected = 0
@@ -116,11 +116,11 @@ const enterOnly = (event) => {
   if (!isMobile()) send()
 }
 
-defineExpose({ usePrompt, refreshDocList })
+defineExpose({usePrompt, refreshDocList})
 
 const toolSelector = ref({
   list: [
-    { title: 'Chat', icon: 'add', name: 'chat', role: AuthorRole.User },
+    {title: 'Chat', icon: 'add', name: 'chat', role: AuthorRole.User},
   ],
   selected: 0
 })
