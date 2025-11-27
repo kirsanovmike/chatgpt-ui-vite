@@ -127,29 +127,37 @@
           </div>
 
           <!-- Центр: редактор сообщения -->
-          <div class="chat-footer-center d-flex align-end py-3">
-            <v-btn
-                v-show="!fetchingResponse"
-                class="chat-footer-icon-btn mr-6 mb-1"
-                icon="view_list"
-                size="z-large"
-                style="width: 48px; height: 48px;"
-                @click="dialogAll = true"
-            />
-            <MsgEditor
-                ref="editor"
-                :disabled="fetchingResponse"
-                :loading="fetchingResponse"
-                :send-message="send"
-            />
-            <v-btn
-                v-show="fetchingResponse"
-                class="chat-footer-icon-btn mb-1 ml-6"
-                icon="close"
-                title="Stop"
-                style="width: 48px; height: 48px;"
-                @click="stop"
-            />
+          <div class="chat-footer-center">
+            <div class="d-flex flex-column justify-center" style="width: 100%">
+              <div class="d-flex align-end py-3">
+                <v-btn
+                    v-show="!fetchingResponse"
+                    class="chat-footer-icon-btn mr-6 mb-1 ml-n3"
+                    icon="view_list"
+                    size="z-large"
+                    style="width: 48px; height: 48px;"
+                    @click="dialogAll = true"
+                />
+                <MsgEditor
+                    ref="editor"
+                    :disabled="fetchingResponse"
+                    :loading="fetchingResponse"
+                    :send-message="send"
+                />
+                <v-btn
+                    v-show="fetchingResponse"
+                    class="chat-footer-icon-btn mb-1 ml-6"
+                    icon="close"
+                    style="width: 48px; height: 48px;"
+                    title="Stop"
+                    @click="stop"
+                />
+              </div>
+
+              <div class="floating-disclaimer d-flex justify-center font-weight-regular" style="font-size: 12px;">
+                ТНЭ чат может допускать ошибки. Проверяйте важную информацию.
+              </div>
+            </div>
           </div>
         </div>
       </div>

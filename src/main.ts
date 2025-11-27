@@ -48,7 +48,7 @@ const darkTheme: ThemeDefinition = {
 const lightTheme: ThemeDefinition = {
   dark: false,
   colors: {
-    background: 'rgba(247,247,248,0.63)',
+    background: '#edeff6',
 
     // поверхности / карточки
     surface: 'rgba(247,247,248,0.63)',
@@ -65,7 +65,7 @@ const lightTheme: ThemeDefinition = {
     'on-surface-variant': '#6B7280',
 
     // layout
-    'sidebar-bg': '#dddddd',
+    'sidebar-bg': '#e1e5ef',
     'header-bg': '#f5f5f5',
     'chat-card': '#FFFFFF',
   },

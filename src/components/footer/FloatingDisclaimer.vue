@@ -9,10 +9,6 @@
 
 <style lang="scss" scoped>
 .floating-disclaimer {
-  position: fixed;
-  /* с учётом нижнего app-footer’а */
-  bottom: 4px;
-
   /* центр рабочей области v-main, а не всего окна */
   left: calc(
       var(--v-layout-left, 0px) +

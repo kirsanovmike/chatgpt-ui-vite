@@ -49,7 +49,6 @@
   <v-main>
     <Welcome v-if="!route.params.id && (conversation.messages?.length ?? 0) === 0"/>
     <Conversation :conversation="conversation"/>
-    <FloatingDisclaimer style="z-index: 10000"/>
   </v-main>
 </template>
 
@@ -59,7 +58,6 @@ import {useRoute, useRouter} from 'vue-router'
 import {useDrawer} from '@/composables/states'
 import Welcome from '@/components/Welcome.vue'
 import Conversation from '@/components/Conversation.vue'
-import FloatingDisclaimer from '@/components/footer/FloatingDisclaimer.vue'
 
 // ===== Типы =====
 type ChatMessage = {
