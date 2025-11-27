@@ -1,5 +1,6 @@
 <template>
-  <v-container class="py-10">
+  <div class="d-flex justify-center px-12">
+  <v-container class="py-10 px-0 ma-0" style="width: 100%">
     <!-- Заголовок -->
     <v-row style="margin-top: 140px;">
       <v-col cols="12">
@@ -59,6 +60,7 @@
       </v-col>
     </v-row>
   </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">

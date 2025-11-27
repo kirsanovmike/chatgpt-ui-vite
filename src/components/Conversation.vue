@@ -1,5 +1,5 @@
 <template>
-  <div v-if="conversation">
+  <div v-if="conversation" class="mt-12">
     <!-- Спиннер загрузки сообщений -->
     <div v-if="conversation.loadingMessages" class="text-center">
       <v-progress-circular color="primary" indeterminate/>
@@ -583,5 +583,13 @@ const onModelChange = (model: string) => {
 .model-select {
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<style lang="scss">
+.message-wrapper.message-error {
+  .v-card {
+    background: transparent;
+  }
 }
 </style>

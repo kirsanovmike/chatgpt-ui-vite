@@ -88,7 +88,7 @@
     opacity: 1;
 }
 .v-theme--dark .liquidGlass-tint {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.18);
 }
 .v-theme--dark .liquidGlass-wrapper {
     box-shadow: none;
