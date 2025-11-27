@@ -8,7 +8,7 @@
     <!-- Основной контент чата -->
     <div v-else>
       <div ref="chatWindow">
-        <!-- Телепорт для селекта модели в шапку -->
+        <!-- Телепорт для селекта модели в шапке -->
         <Teleport to="#portal-target">
           <div class="model-select-container" style="margin-top: 2px;">
             <v-select
@@ -39,11 +39,12 @@
                   class="d-flex align-center content_and_action"
               >
                 <div class="d-flex flex-row-reverse">
-
                   <!-- Контент сообщения -->
                   <div :class="['message-wrapper', { 'message-error': message.is_error }]">
-                    <div :class="message.role === AuthorRole.Assistant ? 'align-start' : 'align-end'"
-                         class="d-flex flex-column">
+                    <div
+                        :class="message.role === AuthorRole.Assistant ? 'align-start' : 'align-end'"
+                        class="d-flex flex-column"
+                    >
                       <MsgContent
                           :delete-message="deleteMessage"
                           :index="index"
@@ -52,12 +53,12 @@
                       />
                       <MessageActions
                           v-if="!message.is_error"
+                          :additional-class="message.role === AuthorRole.Assistant ? 'ml-2' : 'mr-2'"
                           :delete-message="deleteMessage"
                           :message="message"
                           :message-index="index"
                           :use-prompt="usePrompt"
                           class="message-actions"
-                          :additional-class="message.role === AuthorRole.Assistant ? 'ml-2' : 'mr-2'"
                       />
                     </div>
                   </div>
@@ -88,11 +89,26 @@
     </div>
   </div>
 
+  <!-- Кнопка прокрутки вниз (в стилистике liquidGlass, по центру области чата) -->
+  <div v-if="showScrollDown" class="scroll-down-wrapper mb-6">
+    <div class="liquidGlass-wrapper liquidGlass-wrapper--lg scroll-down-glass" style="width: 56px; height: 56px;">
+      <div class="liquidGlass-effect"></div>
+      <div class="liquidGlass-tint"></div>
+      <div class="liquidGlass-shine"></div>
+      <div class="liquidGlass-text scroll-down-inner">
+        <v-btn
+            class="scroll-down-btn chat-footer-icon-btn"
+            icon="arrow_down"
+            variant="text"
+            color="on-background"
+            @click="scrollChatWindow"
+        />
+      </div>
+    </div>
+  </div>
+
   <!-- Футер с редактором сообщения и выбранным системным промптом -->
-  <v-footer
-      app
-      class="chat-footer"
-  >
+  <v-footer app class="chat-footer">
     <div class="chat-footer-shell">
       <div class="liquidGlass-wrapper liquidGlass-wrapper--lg chat-footer-glass">
         <div class="liquidGlass-effect"></div>
@@ -115,8 +131,6 @@
                   @click="clearSystemPrompt"
               />
             </div>
-
-
           </div>
 
           <!-- Центр: редактор сообщения -->
@@ -147,7 +161,10 @@
                 />
               </div>
 
-              <div class="floating-disclaimer d-flex justify-center font-weight-regular" style="font-size: 12px;">
+              <div
+                  class="floating-disclaimer d-flex justify-center font-weight-regular"
+                  style="font-size: 12px;"
+              >
                 ТНЭ чат может допускать ошибки. Проверяйте важную информацию.
               </div>
             </div>
@@ -178,7 +195,7 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {onBeforeUnmount, onMounted, ref} from 'vue'
 
 import MessageActions from '@/components/MessageActions.vue'
 import MsgContent from '@/components/MsgContent.vue'
@@ -290,7 +307,7 @@ const props = defineProps<{
 
 const dialogAll = ref(false)
 const systemPrompt = ref<{
-  title: string;
+  title: string
   full: string
 } | null>(null)
 
@@ -303,13 +320,18 @@ const selectedModel = ref('qwen3:30b-a3b-q4_K_M')
 const fetchingResponse = ref(false)
 
 const editor = ref<{
-  usePrompt?: (s: string) => void;
+  usePrompt?: (s: string) => void
   refreshDocList?: () => void
 } | null>(null)
 const grab = ref<HTMLElement | null>(null)
+const chatWindow = ref<HTMLElement | null>(null)
 
 const snackbar = ref(false)
 const snackbarText = ref('')
+
+// показать ли кнопку «вниз»
+const showScrollDown = ref(false)
+let intersectionObserver: IntersectionObserver | null = null
 
 // ========================= Вспомогательные функции UI =========================
 
@@ -331,16 +353,39 @@ const toggleMessage = (index: number) => {
   msg.is_disabled = !msg.is_disabled
 }
 
+// следим, виден ли низ чата
+onMounted(() => {
+  if (!grab.value) return
+
+  intersectionObserver = new IntersectionObserver(
+      entries => {
+        const [entry] = entries
+        // если нижний якорь виден — кнопку скрываем
+        showScrollDown.value = !entry.isIntersecting
+      },
+      {
+        root: null,
+        threshold: 0.1
+      }
+  )
+
+  intersectionObserver.observe(grab.value)
+})
+
+onBeforeUnmount(() => {
+  if (intersectionObserver && grab.value) {
+    intersectionObserver.unobserve(grab.value)
+  }
+  intersectionObserver = null
+})
+
 // ========================= Работа с системным промптом =========================
 
 const clearSystemPrompt = () => {
   systemPrompt.value = null
 }
 
-const applySystemPrompt = (prompt: {
-  title: string;
-  full: string
-}) => {
+const applySystemPrompt = (prompt: { title: string; full: string }) => {
   systemPrompt.value = prompt
 }
 
@@ -383,7 +428,8 @@ const fetchReply = async () => {
     console.error('Ошибка при запросе к LLM', error)
 
     props.conversation.messages.push({
-      content: 'Упс, что-то пошло не так при обращении к модели. Попробуйте ещё раз чуть позже.',
+      content:
+          'Упс, что-то пошло не так при обращении к модели. Попробуйте ещё раз чуть позже.',
       role: AuthorRole.Assistant,
       is_error: true
     })
@@ -393,10 +439,7 @@ const fetchReply = async () => {
   }
 }
 
-const send = (message: {
-  content: string;
-  role: string
-}) => {
+const send = (message: { content: string; role: string }) => {
   fetchingResponse.value = true
 
   const enrichedContent = systemPrompt.value?.full
@@ -465,6 +508,41 @@ const onModelChange = (model: string) => {
   background-color: rgba(var(--v-theme-error), 0.06);
   border-radius: 8px;
   padding: 8px 12px;
+}
+
+/* ===== Кнопка прокрутки вниз в стиле liquidGlass ===== */
+
+.scroll-down-wrapper {
+  position: fixed;
+  left: 0;
+  bottom: 140px; /* чуть выше футера */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 1200;
+  pointer-events: none; /* кликается только сама кнопка */
+}
+
+.scroll-down-glass {
+  pointer-events: auto;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scroll-down-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scroll-down-btn.v-btn {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  padding: 0;
 }
 
 /* ===== Футер ===== */

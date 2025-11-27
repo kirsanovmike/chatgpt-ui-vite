@@ -1,17 +1,19 @@
 <template>
   <v-app-bar class="ai-app-bar d-flex mt-4" style="background-color: transparent">
     <div class="d-flex align-center">
+      <!-- Логотип, цвет берётся из темы -->
+      <div class="ai-logo__img mr-4"></div>
+
       <div class="liquidGlass-wrapper liquidGlass-wrapper--lg">
         <div class="liquidGlass-effect"></div>
         <div class="liquidGlass-tint"></div>
         <div class="liquidGlass-shine"></div>
         <div class="liquidGlass-text">
-          <v-app-bar-nav-icon
-              @click="toggleDrawer"/>
-          <v-toolbar-title class="pr-4">{{ navTitle }}</v-toolbar-title>
+          <v-app-bar-nav-icon @click="toggleDrawer" />
         </div>
       </div>
     </div>
+
     <div class="d-flex align-center">
       <div class="liquidGlass-wrapper liquidGlass-wrapper--lg" style="min-height: 61px;">
         <div class="liquidGlass-effect"></div>
@@ -21,6 +23,7 @@
           <div id="portal-target"></div>
         </div>
       </div>
+
       <div
           class="liquidGlass-wrapper liquidGlass-wrapper--lg liquidGlass-wrapper--new-chat ml-4"
           @click="createNewConversation"
@@ -37,7 +40,7 @@
           />
           <!-- десктоп: текстовая кнопка -->
           <v-btn
-              class="text-none d-none d-md-block"
+              class="text-none d-none d-md-block text-body-1"
           >
             {{ $textVariables.newConversation }}
           </v-btn>
@@ -47,15 +50,15 @@
   </v-app-bar>
 
   <v-main>
-    <Welcome v-if="!route.params.id && (conversation.messages?.length ?? 0) === 0"/>
-    <Conversation :conversation="conversation"/>
+    <Welcome v-if="!route.params.id && (conversation.messages?.length ?? 0) === 0" />
+    <Conversation :conversation="conversation" />
   </v-main>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref, watch} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {useDrawer} from '@/composables/states'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useDrawer } from '@/composables/states'
 import Welcome from '@/components/Welcome.vue'
 import Conversation from '@/components/Conversation.vue'
 
@@ -108,10 +111,10 @@ const toggleDrawer = () => {
 
 const createNewConversation = () => {
   if (route.path !== '/') {
-    router.push({path: '/', query: {new: '1'}})
+    router.push({ path: '/', query: { new: '1' } })
     return
   }
-  conversation.value = {...getDefaultConversationData(), topic: 'ТНЭ чат'}
+  conversation.value = { ...getDefaultConversationData(), topic: 'ТНЭ чат' }
 }
 
 // ===== Жизненный цикл / реактивность =====
@@ -124,7 +127,7 @@ onMounted(async () => {
   }
 })
 
-// реагируем на смену :id?
+// реагируем на смену :id
 watch(
     () => route.params.id,
     async (id) => {
@@ -139,16 +142,16 @@ watch(
 
 // обрабатываем ?new на главной (аналог onActivated из Nuxt)
 watch(
-    () => ({path: route.path, q: route.query}),
-    ({path, q}) => {
+    () => ({ path: route.path, q: route.query }),
+    ({ path, q }) => {
       if (path === '/' && q?.new !== undefined) {
         createNewConversation()
       }
     },
-    {immediate: true}
+    { immediate: true }
 )
 
-// ===== Заголовок =====
+// ===== Заголовок (если захочешь вернуть в шапку) =====
 const navTitle = computed(() => {
   const topic = conversation.value.topic
   if (topic !== null && topic !== undefined) {
@@ -161,7 +164,6 @@ const navTitle = computed(() => {
 <style>
 /* Общие настройки app-bar */
 .ai-app-bar.v-toolbar {
-  /* отступы слева/справа у всего бара */
   padding-left: 16px;
   padding-right: 16px;
 }
@@ -177,5 +179,33 @@ const navTitle = computed(() => {
 /* Чтоб стеклянные «пилюли» не липли к краю контента */
 .ai-app-bar .liquidGlass-wrapper {
   margin-inline: 4px;
+}
+</style>
+
+<style scoped lang="scss">
+.ai-logo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Логотип как маска — цвет из темы */
+.ai-logo__img {
+  width: 64px;
+  height: 64px;
+  background-color: rgb(var(--v-theme-primary)); // здесь цвет темы
+
+  /* используем svg как маску */
+  -webkit-mask-image: url('@/assets/images/Logo.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+
+  mask-image: url('@/assets/images/Logo.svg');
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
 }
 </style>
