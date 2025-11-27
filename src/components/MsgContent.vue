@@ -211,4 +211,22 @@ onMounted(() => {
 .card_disabled {
   opacity: 0.5;
 }
+
+.chat-msg-content {
+  p, li, h1, h2, h3 {
+    line-height: 28px; /* можешь поиграться 1.5–1.7 */
+  }
+}
+
+.chat-msg-content {
+  p,
+  li,
+  h1,
+  h2,
+  h3 {
+    line-height: 28px;
+    white-space: pre-wrap;  /* ВАЖНО: сохраняем переносы строк */
+  }
+}
+
 </style>
