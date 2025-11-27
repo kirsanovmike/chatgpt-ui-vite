@@ -1,45 +1,62 @@
 <template>
-  <v-app-bar class="ai-app-bar d-flex"
-             style="
-               border-bottom: 1px solid rgb(var(--v-theme-surface));
-               background-color: rgb(var(--v-theme-header-bg));
-               box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.05);
-             "
-  >
+  <v-app-bar class="ai-app-bar d-flex mt-4" style="background-color: transparent">
     <div class="d-flex align-center">
-      <v-app-bar-nav-icon @click="toggleDrawer" />
-
-      <v-toolbar-title>{{ navTitle }}</v-toolbar-title>
+      <div class="liquidGlass-wrapper liquidGlass-wrapper--lg">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <v-app-bar-nav-icon
+              @click="toggleDrawer"/>
+          <v-toolbar-title class="pr-4">{{ navTitle }}</v-toolbar-title>
+        </div>
+      </div>
     </div>
-
-    <div id="portal-target"></div>
-
-    <v-btn
-      title="Новый чат"
-      icon="add"
-      class="d-md-none ma-3"
-      @click="createNewConversation"
-    />
-    <v-btn
-      variant="outlined"
-      class="text-none d-none d-md-block"
-      @click="createNewConversation"
-    >
-      {{$textVariables.newConversation}}
-    </v-btn>
+    <div class="d-flex align-center">
+      <div class="liquidGlass-wrapper liquidGlass-wrapper--lg">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <div id="portal-target"></div>
+        </div>
+      </div>
+      <div
+          class="liquidGlass-wrapper liquidGlass-wrapper--lg liquidGlass-wrapper--new-chat"
+          @click="createNewConversation"
+      >
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
+        <div class="liquidGlass-text">
+          <!-- мобилка: только плюс -->
+          <v-btn
+              class="d-md-none appbar-icon-btn"
+              icon="add"
+              title="Новый чат"
+          />
+          <!-- десктоп: текстовая кнопка -->
+          <v-btn
+              class="text-none d-none d-md-block"
+          >
+            {{ $textVariables.newConversation }}
+          </v-btn>
+        </div>
+      </div>
+    </div>
   </v-app-bar>
 
   <v-main>
-    <Welcome v-if="!route.params.id && (conversation.messages?.length ?? 0) === 0" />
-    <Conversation :conversation="conversation" />
-    <FloatingDisclaimer style="z-index: 10000" />
+    <Welcome v-if="!route.params.id && (conversation.messages?.length ?? 0) === 0"/>
+    <Conversation :conversation="conversation"/>
+    <FloatingDisclaimer style="z-index: 10000"/>
   </v-main>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useDrawer } from '@/composables/states'
+<script lang="ts" setup>
+import {computed, onMounted, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {useDrawer} from '@/composables/states'
 import Welcome from '@/components/Welcome.vue'
 import Conversation from '@/components/Conversation.vue'
 import FloatingDisclaimer from '@/components/footer/FloatingDisclaimer.vue'
@@ -87,14 +104,16 @@ const loadMessage = async () => {
 }
 
 // ===== UI-экшены =====
-const toggleDrawer = () => { drawer.value = !drawer.value }
+const toggleDrawer = () => {
+  drawer.value = !drawer.value
+}
 
 const createNewConversation = () => {
   if (route.path !== '/') {
-    router.push({ path: '/', query: { new: '1' } })
+    router.push({path: '/', query: {new: '1'}})
     return
   }
-  conversation.value = { ...getDefaultConversationData(), topic: 'Новый чат' }
+  conversation.value = {...getDefaultConversationData(), topic: 'Новый чат'}
 }
 
 // ===== Жизненный цикл / реактивность =====
@@ -109,26 +128,26 @@ onMounted(async () => {
 
 // реагируем на смену :id?
 watch(
-  () => route.params.id,
-  async (id) => {
-    if (id) {
-      conversation.value.loadingMessages = true
-      await loadConversation()
-      await loadMessage()
-      conversation.value.loadingMessages = false
+    () => route.params.id,
+    async (id) => {
+      if (id) {
+        conversation.value.loadingMessages = true
+        await loadConversation()
+        await loadMessage()
+        conversation.value.loadingMessages = false
+      }
     }
-  }
 )
 
 // обрабатываем ?new на главной (аналог onActivated из Nuxt)
 watch(
-  () => ({ path: route.path, q: route.query }),
-  ({ path, q }) => {
-    if (path === '/' && q?.new !== undefined) {
-      createNewConversation()
-    }
-  },
-  { immediate: true }
+    () => ({path: route.path, q: route.query}),
+    ({path, q}) => {
+      if (path === '/' && q?.new !== undefined) {
+        createNewConversation()
+      }
+    },
+    {immediate: true}
 )
 
 // ===== Заголовок =====
@@ -142,12 +161,23 @@ const navTitle = computed(() => {
 </script>
 
 <style>
-/* стили по желанию */
+/* Общие настройки app-bar */
 .ai-app-bar.v-toolbar {
-  .v-toolbar__content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  /* отступы слева/справа у всего бара */
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Контейнер контента внутри app-bar */
+.ai-app-bar .v-toolbar__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px; /* расстояние между стеклянными блоками */
+}
+
+/* Чтоб стеклянные «пилюли» не липли к краю контента */
+.ai-app-bar .liquidGlass-wrapper {
+  margin-inline: 4px;
 }
 </style>

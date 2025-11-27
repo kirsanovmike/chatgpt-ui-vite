@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-disclaimer" style="font-size: 10px;">
+  <div class="floating-disclaimer" style="font-size: 12px;">
     ТНЭ чат может допускать ошибки. Проверяйте важную информацию.
   </div>
 </template>
@@ -11,7 +11,7 @@
 .floating-disclaimer {
   position: fixed;
   /* с учётом нижнего app-footer’а */
-  bottom: 0;
+  bottom: 4px;
 
   /* центр рабочей области v-main, а не всего окна */
   left: calc(

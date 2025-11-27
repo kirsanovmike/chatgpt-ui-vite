@@ -1,0 +1,98 @@
+.liquidGlass-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+
+    border-radius: 999px;
+    padding-inline: 16px; /* те самые 4 = 16px */
+    padding-block: 8px;
+
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
+
+/* ВСЕ внутренние слои наследуют скругление */
+.liquidGlass-wrapper,
+.liquidGlass-effect,
+.liquidGlass-tint,
+.liquidGlass-shine,
+.liquidGlass-text {
+    border-radius: inherit;
+}
+
+.liquidGlass-effect {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    filter: url(#glass-distortion);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.liquidGlass-tint {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.18); /* чуть меньше, чтобы не был бетон */
+}
+
+.liquidGlass-shine {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.liquidGlass-text {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.liquidGlass-effect {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    filter: url(#glass-distortion);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.liquidGlass-wrapper--md { border-radius: 16px; }
+.liquidGlass-wrapper--lg { border-radius: 24px; }
+
+.appbar-icon-btn.v-btn {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    border-radius: 50%;
+    padding: 0;
+}
+
+/* только для контейнера "Новый чат" */
+.liquidGlass-wrapper--new-chat {
+    /* на десктопе — такие же паддинги, как у остальных */
+}
+
+/* на мобилке делаем почти квадрат, чтобы обёртка стала кругом */
+@media (max-width: 960px) {
+    .liquidGlass-wrapper--new-chat {
+        padding: 8px; /* одинаковый отступ по всем сторонам */
+    }
+}
+
+header {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+}
