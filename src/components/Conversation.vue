@@ -127,7 +127,7 @@
           </div>
 
           <!-- Центр: редактор сообщения -->
-          <div class="chat-footer-center d-flex align-end">
+          <div class="chat-footer-center d-flex align-end py-3">
             <v-btn
                 v-show="!fetchingResponse"
                 class="chat-footer-icon-btn mr-6 mb-1"
