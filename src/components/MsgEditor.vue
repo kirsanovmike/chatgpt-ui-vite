@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-grow-1 d-flex align-center justify-space-between">
+  <div class="flex-grow-1 d-flex align-end justify-space-between">
     <v-textarea
         ref="textArea"
         v-model="message"
@@ -26,7 +26,7 @@
     <v-btn
         v-if="!loading"
         :disabled="!maxLengthRule(message)"
-        class="ml-6"
+        class="ml-6 mb-1"
         elevation="0"
         icon="send"
         title="Send"

@@ -2,7 +2,7 @@
   <div v-if="conversation">
     <!-- Спиннер загрузки сообщений -->
     <div v-if="conversation.loadingMessages" class="text-center">
-      <v-progress-circular indeterminate color="primary" />
+      <v-progress-circular color="primary" indeterminate/>
     </div>
 
     <!-- Основной контент чата -->
@@ -14,13 +14,13 @@
             <v-select
                 v-model="selectedModel"
                 :items="models"
+                class="model-select"
+                density="compact"
+                hide-details
                 item-title="name"
                 item-value="value"
                 label="Модель"
                 variant="outlined"
-                density="compact"
-                class="model-select"
-                hide-details
                 @update:model-value="onModelChange"
             />
           </div>
@@ -35,39 +35,39 @@
                 cols="12"
             >
               <div
-                  class="d-flex align-center content_and_action"
                   :class="message.role === AuthorRole.Assistant ? 'justify-start' : 'justify-end'"
+                  class="d-flex align-center content_and_action"
               >
                 <div class="d-flex flex-row-reverse">
                   <!-- Экшены для сообщений пользователя -->
                   <MessageActions
                       v-if="message.role !== AuthorRole.Assistant"
-                      class="message-actions"
+                      :delete-message="deleteMessage"
                       :message="message"
                       :message-index="index"
-                      :use-prompt="usePrompt"
-                      :delete-message="deleteMessage"
                       :toggle-message="toggleMessage"
+                      :use-prompt="usePrompt"
+                      class="message-actions"
                   />
 
                   <!-- Контент сообщения -->
                   <div :class="['message-wrapper', { 'message-error': message.is_error }]">
                     <MsgContent
-                        :message="message"
-                        :index="index"
-                        :use-prompt="usePrompt"
                         :delete-message="deleteMessage"
+                        :index="index"
+                        :message="message"
+                        :use-prompt="usePrompt"
                     />
                   </div>
 
                   <!-- Экшены для сообщений ассистента -->
                   <MessageActions
                       v-if="message.role === AuthorRole.Assistant"
-                      class="message-actions"
+                      :delete-message="deleteMessage"
                       :message="message"
                       :message-index="index"
                       :use-prompt="usePrompt"
-                      :delete-message="deleteMessage"
+                      class="message-actions"
                   />
                 </div>
               </div>
@@ -77,7 +77,7 @@
             <v-col v-if="fetchingResponse" cols="12">
               <div class="d-flex align-center justify-start">
                 <div class="d-flex align-center">
-                  <v-icon icon="mdi-robot" class="mr-2" />
+                  <v-icon class="mr-2" icon="mdi-robot"/>
                   <div class="typing-indicator">
                     <span class="typing-dot"></span>
                     <span class="typing-dot"></span>
@@ -98,56 +98,66 @@
   <!-- Футер с редактором сообщения и выбранным системным промптом -->
   <v-footer
       app
-      class="footer chat-footer py-5"
+      class="chat-footer"
   >
-    <!-- Плашка с активным системным промптом -->
-    <div
-        v-if="systemPrompt"
-        class="d-flex align-center mb-6 ml-3 py-1 system-prompt-label"
-    >
-      <span class="mr-2 text-body-1">{{ systemPrompt.title }}</span>
-      <v-btn
-          icon="close"
-          color="transparent"
-          size="dense"
-          elevation="0"
-          @click="clearSystemPrompt"
-      />
-    </div>
+    <div class="chat-footer-shell">
+      <div class="liquidGlass-wrapper liquidGlass-wrapper--lg chat-footer-glass">
+        <div class="liquidGlass-effect"></div>
+        <div class="liquidGlass-tint"></div>
+        <div class="liquidGlass-shine"></div>
 
-    <!-- Область ввода -->
-    <div class="px-md-4 w-100 d-flex flex-column">
-      <div class="d-flex align-center">
-        <!-- Кнопка открытия списка готовых промптов -->
-        <v-btn
-            v-show="!fetchingResponse"
-            icon="view_list"
-            class="mr-4"
-            elevation="0"
-            @click="dialogAll = true"
-        />
-        <!-- Редактор сообщения -->
-        <MsgEditor
-            ref="editor"
-            :send-message="send"
-            :disabled="fetchingResponse"
-            :loading="fetchingResponse"
-        />
-        <!-- Кнопка остановки генерации -->
-        <v-btn
-            v-show="fetchingResponse"
-            icon="close"
-            title="Stop"
-            class="ml-4"
-            elevation="0"
-            @click="stop"
-        />
+        <div class="liquidGlass-text chat-footer-content">
+          <!-- Левый блок: активный системный промпт + кнопка промптов -->
+          <div class="chat-footer-left">
+            <div
+                v-if="systemPrompt"
+                class="d-flex align-center mr-3 system-prompt-label"
+            >
+              <span class="mr-1 text-body-2">{{ systemPrompt.title }}</span>
+              <v-btn
+                  class="system-prompt-close"
+                  icon="close"
+                  size="x-small"
+                  variant="text"
+                  @click="clearSystemPrompt"
+              />
+            </div>
+
+
+          </div>
+
+          <!-- Центр: редактор сообщения -->
+          <div class="chat-footer-center d-flex align-end">
+            <v-btn
+                v-show="!fetchingResponse"
+                class="chat-footer-icon-btn mr-6 mb-1"
+                icon="view_list"
+                size="z-large"
+                style="width: 48px; height: 48px;"
+                @click="dialogAll = true"
+            />
+            <MsgEditor
+                ref="editor"
+                :disabled="fetchingResponse"
+                :loading="fetchingResponse"
+                :send-message="send"
+            />
+            <v-btn
+                v-show="fetchingResponse"
+                class="chat-footer-icon-btn mb-1 ml-6"
+                icon="close"
+                title="Stop"
+                style="width: 48px; height: 48px;"
+                @click="stop"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </v-footer>
 
   <!-- Снэкбар для уведомлений -->
-  <v-snackbar v-model="snackbar" multi-line location="top">
+  <v-snackbar v-model="snackbar" location="top" multi-line>
     {{ snackbarText }}
     <template #actions>
       <v-btn color="red" variant="text" @click="snackbar = false">
@@ -159,25 +169,15 @@
   <!-- Диалог со всеми готовыми промптами -->
   <PromptsDialog
       v-model="dialogAll"
-      :system-prompts="systemPrompts"
       :ready-prompts="readyPrompts"
+      :system-prompts="systemPrompts"
       @use="applySystemPrompt"
       @apply-ready="applyReadyPrompt"
   />
 </template>
 
-<script setup lang="ts">
-/**
- * Компонент Conversation
- * Отвечает за:
- *  - отображение ленты сообщений чата
- *  - выбор модели
- *  - ввод нового сообщения
- *  - показ индикатора печати
- *  - работу с системными и готовыми промптами
- */
-
-import { ref } from 'vue'
+<script lang="ts" setup>
+import {ref} from 'vue'
 
 import MessageActions from '@/components/MessageActions.vue'
 import MsgContent from '@/components/MsgContent.vue'
@@ -185,8 +185,8 @@ import MsgEditor from '@/components/MsgEditor.vue'
 import PromptsDialog from './PromtsDialog.vue'
 
 import Llm from '@/api/Llm'
-import { AuthorRole } from '@/data/enums/AuthorRole'
-import { trimMessagesByTokens } from '@/helpers/llm'
+import {AuthorRole} from '@/data/enums/AuthorRole'
+import {trimMessagesByTokens} from '@/helpers/llm'
 
 // ========================= Локальные типы =========================
 
@@ -208,10 +208,6 @@ type ConversationT = {
 
 // ========================= Константы промптов =========================
 
-/**
- * Набор системных промптов — пользователь выбирает один,
- * он подмешивается к вопросу, который отправляется модели.
- */
 const systemPrompts = [
   {
     title: 'Ассистент по переписке',
@@ -237,10 +233,6 @@ const systemPrompts = [
   }
 ]
 
-/**
- * Готовые промпты — длинные заготовки задач,
- * которые пользователь может вставить в редактор.
- */
 const readyPrompts = [
   {
     id: 'anti-manipulation',
@@ -289,61 +281,50 @@ const readyPrompts = [
   }
 ]
 
-// ========================= Пропсы и основное состояние =========================
+// ========================= Пропсы и состояние =========================
 
-const props = defineProps<{ conversation: ConversationT }>()
+const props = defineProps<{
+  conversation: ConversationT
+}>()
 
-/** Флаг открытия диалога «Все промпты» */
 const dialogAll = ref(false)
+const systemPrompt = ref<{
+  title: string;
+  full: string
+} | null>(null)
 
-/** Текущий системный промпт, который применён к чату */
-const systemPrompt = ref<{ title: string; full: string } | null>(null)
-
-/** Текущая выбранная модель генерации */
 const models = [
-  { name: 'Для кода', value: 'qwen3-coder:30b' },
-  { name: 'Для любых задач', value: 'qwen3:30b-a3b-q4_K_M' }
+  {name: 'Для кода', value: 'qwen3-coder:30b'},
+  {name: 'Для любых задач', value: 'qwen3:30b-a3b-q4_K_M'}
 ]
 const selectedModel = ref('qwen3:30b-a3b-q4_K_M')
 
-/** Флаг: идёт ли сейчас запрос к LLM */
 const fetchingResponse = ref(false)
 
-/** Рефы для управления редактором и прокруткой */
-const editor = ref<{ usePrompt?: (s: string) => void; refreshDocList?: () => void } | null>(null)
+const editor = ref<{
+  usePrompt?: (s: string) => void;
+  refreshDocList?: () => void
+} | null>(null)
 const grab = ref<HTMLElement | null>(null)
 
-/** Снэкбар для уведомлений (на будущее) */
 const snackbar = ref(false)
 const snackbarText = ref('')
 
 // ========================= Вспомогательные функции UI =========================
 
-/**
- * Прокрутка чата к нижнему якорю, чтобы пользователь видел последние сообщения.
- */
 const scrollChatWindow = () => {
   if (!grab.value) return
-  grab.value.scrollIntoView({ behavior: 'smooth' })
+  grab.value.scrollIntoView({behavior: 'smooth'})
 }
 
-/**
- * Подставить готовый промпт в редактор.
- */
 const usePrompt = (prompt: string) => {
   editor.value?.usePrompt?.(prompt)
 }
 
-/**
- * Удалить сообщение по индексу.
- */
 const deleteMessage = (index: number) => {
   props.conversation.messages.splice(index, 1)
 }
 
-/**
- * Переключить флаг отключения сообщения (например, для пересчёта контекста).
- */
 const toggleMessage = (index: number) => {
   const msg = props.conversation.messages[index]
   msg.is_disabled = !msg.is_disabled
@@ -351,44 +332,30 @@ const toggleMessage = (index: number) => {
 
 // ========================= Работа с системным промптом =========================
 
-/**
- * Очистить активный системный промпт.
- */
 const clearSystemPrompt = () => {
   systemPrompt.value = null
 }
 
-/**
- * Установить системный промпт (выбор из списка).
- */
-const applySystemPrompt = (prompt: { title: string; full: string }) => {
+const applySystemPrompt = (prompt: {
+  title: string;
+  full: string
+}) => {
   systemPrompt.value = prompt
 }
 
-/**
- * Применить «готовый» длинный промпт — просто заполняем редактор.
- */
 const applyReadyPrompt = (prompt: string) => {
   editor.value?.usePrompt?.(prompt)
 }
 
 // ========================= Работа с LLM =========================
 
-/** Контроллер для возможной отмены запроса (сейчас используется как заглушка) */
 let ctrl: AbortController | null = null
 
-/**
- * Принудительно остановить запрос (в оффлайне просто сбрасываем флаг).
- */
 const abortFetch = () => {
   if (ctrl) ctrl.abort()
   fetchingResponse.value = false
 }
 
-/**
- * Запрос ответа у LLM для текущего набора сообщений.
- * Здесь же обрезаем историю по токенам.
- */
 const fetchReply = async () => {
   fetchingResponse.value = true
 
@@ -425,13 +392,10 @@ const fetchReply = async () => {
   }
 }
 
-/**
- * Отправка нового сообщения:
- *  - добавляем сообщение пользователя в массив
- *  - подмешиваем системный промпт, если выбран
- *  - запускаем генерацию ответа
- */
-const send = (message: { content: string; role: string }) => {
+const send = (message: {
+  content: string;
+  role: string
+}) => {
   fetchingResponse.value = true
 
   const enrichedContent = systemPrompt.value?.full
@@ -447,15 +411,8 @@ const send = (message: { content: string; role: string }) => {
   scrollChatWindow()
 }
 
-/**
- * Обработчик кнопки «Stop» — просто останавливает текущий запрос.
- */
 const stop = () => abortFetch()
 
-/**
- * Обработчик смены модели — сейчас только логируем,
- * но здесь удобное место для будущей логики.
- */
 const onModelChange = (model: string) => {
   console.log('Выбрана модель:', model)
 }
@@ -509,22 +466,66 @@ const onModelChange = (model: string) => {
   padding: 8px 12px;
 }
 
-/* Плашка активного системного промпта */
-.system-prompt-label {
-  font-size: 0.8rem;
-  color: rgb(var(--v-theme-system-prompt));
-  padding: 4px 8px;
-  border: 8px solid rgb(var(--v-theme-system-prompt));
-  border-radius: 4px;
-  background-color: rgb(var(--v-theme-primary-lighten));
-  display: inline-block;
+/* ===== Футер ===== */
+
+.chat-footer {
+  background-color: transparent;
+  border-top: none;
+  padding: 0;
 }
 
-/* Оформление футера с инпутом */
-.chat-footer {
-  display: block;
-  border-top: 1px solid rgb(var(--v-theme-surface));
-  background-color: rgb(var(--v-theme-header-bg));
+.chat-footer-shell {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 90px) 28px; /* левитация над нижним краем */
+}
+
+.chat-footer-glass {
+  width: 100%;
+}
+
+.chat-footer-content {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.chat-footer-left,
+.chat-footer-right {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.chat-footer-center {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+}
+
+/* Иконки слева/справа (круглые) */
+.chat-footer-icon-btn.v-btn {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  padding: 0;
+}
+
+/* Плашка активного системного промпта внутри футера */
+.system-prompt-label {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: rgba(var(--v-theme-system-prompt), 0.12);
+  color: rgb(var(--v-theme-system-prompt));
+  white-space: nowrap;
+}
+
+.system-prompt-close.v-btn {
+  margin-left: 4px;
 }
 
 /* Анимация «печатает…» */
