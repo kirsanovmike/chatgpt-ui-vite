@@ -1,42 +1,20 @@
 <template>
-  <div class="">
-<!--    <v-menu>-->
-<!--      <template #activator="{ props }">-->
-<!--        <v-btn-->
-<!--            v-bind="props"-->
-<!--            icon-->
-<!--            variant="text"-->
-<!--            class="mx-1 ma-2"-->
-<!--        >-->
-<!--          <v-icon icon="mdi-dots-horizontal" />-->
-<!--        </v-btn>-->
-<!--      </template>-->
-
-<!--      <v-list>-->
-<!--        <v-list-item-->
-<!--            -->
-<!--            title="Копировать"-->
-<!--            prepend-icon="mdi-content-copy"-->
-<!--        />-->
-<!--      </v-list>-->
-<!--    </v-menu>-->
-
-    <v-icon @click="copyMessage()" size="dense" icon="mdi-content-copy" />
-    <v-snackbar
-        v-model="snackbar"
-        location="top"
-        timeout="2000"
-    >
-      {{ snackbarText }}
-    </v-snackbar>
-  </div>
+  <v-icon class="mt-3" :class="additionalClass" icon="mdi-content-copy" size="dense" @click="copyMessage()"/>
+  <v-snackbar
+      v-model="snackbar"
+      location="top"
+      timeout="2000"
+  >
+    {{ snackbarText }}
+  </v-snackbar>
 </template>
 
 <script setup>
 import {ref} from "vue";
 
 const props = defineProps({
-  message: { type: Object, required: true }
+  message: {type: Object, required: true},
+  additionalClass: {type: String, required: false},
 })
 
 const snackbar = ref(false)

@@ -39,36 +39,29 @@
                   class="d-flex align-center content_and_action"
               >
                 <div class="d-flex flex-row-reverse">
-                  <!-- Экшены для сообщений пользователя -->
-                  <MessageActions
-                      v-if="message.role !== AuthorRole.Assistant"
-                      :delete-message="deleteMessage"
-                      :message="message"
-                      :message-index="index"
-                      :toggle-message="toggleMessage"
-                      :use-prompt="usePrompt"
-                      class="message-actions"
-                  />
 
                   <!-- Контент сообщения -->
                   <div :class="['message-wrapper', { 'message-error': message.is_error }]">
-                    <MsgContent
-                        :delete-message="deleteMessage"
-                        :index="index"
-                        :message="message"
-                        :use-prompt="usePrompt"
-                    />
+                    <div :class="message.role === AuthorRole.Assistant ? 'align-start' : 'align-end'"
+                         class="d-flex flex-column">
+                      <MsgContent
+                          :delete-message="deleteMessage"
+                          :index="index"
+                          :message="message"
+                          :use-prompt="usePrompt"
+                      />
+                      <MessageActions
+                          v-if="!message.is_error"
+                          :delete-message="deleteMessage"
+                          :message="message"
+                          :message-index="index"
+                          :use-prompt="usePrompt"
+                          class="message-actions"
+                          :additional-class="message.role === AuthorRole.Assistant ? 'ml-2' : 'mr-2'"
+                      />
+                    </div>
                   </div>
-
                   <!-- Экшены для сообщений ассистента -->
-                  <MessageActions
-                      v-if="message.role === AuthorRole.Assistant"
-                      :delete-message="deleteMessage"
-                      :message="message"
-                      :message-index="index"
-                      :use-prompt="usePrompt"
-                      class="message-actions"
-                  />
                 </div>
               </div>
             </v-col>
