@@ -85,10 +85,10 @@
 
 /* тёмная тема: стекло без внешней тени */
 .v-theme--dark .liquidGlass-effect {
-    opacity: 0.9;
+    opacity: 1;
 }
 .v-theme--dark .liquidGlass-tint {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.2);
 }
 .v-theme--dark .liquidGlass-wrapper {
     box-shadow: none;
